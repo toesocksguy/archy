@@ -81,6 +81,12 @@ remove_conflicting() {
     fi
 }
 
+update_system() {
+    log_info "Updating system..."
+    sudo pacman -Syu --noconfirm
+    log_ok "System updated"
+}
+
 install_packages() {
     log_info "Installing packages..."
     remove_conflicting
@@ -96,6 +102,7 @@ main() {
     echo "Arch Linux Setup"
     echo "================"
 
+    update_system
     install_packages
     log_ok "Setup complete!"
 }
