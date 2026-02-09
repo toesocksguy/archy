@@ -1,0 +1,11 @@
+*~
+*.bak
+*.swp
+*.swo
+.DS_Store
+
+# Emacs
+\#*#
+.\#*
+*.elc
+auto-save-list/
