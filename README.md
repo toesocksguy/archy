@@ -131,6 +131,14 @@ rules = (
 );
 ```
 
+### Suckless Permission Denied on config.h
+
+**Problem:** Re-running the script fails with "permission denied" when copying config.h into the dwm or slstatus directory.
+
+**Cause:** Earlier versions of the script ran `sudo make clean install`, which created root-owned files. On the next run, the regular user can't overwrite them.
+
+**Solution:** The script now runs `make clean` as the user and only `sudo make install`. If you hit this on an existing install, either `sudo chown -R $USER ~/.config/dwm ~/.config/slstatus` or start from a fresh install.
+
 ### QEMU/KVM Video Driver
 
 **Note:** For VMs using QEMU/KVM, you may need to install `xf86-video-qxl` for proper display.
