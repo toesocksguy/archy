@@ -156,6 +156,31 @@ install_dwm() {
     log_ok "dwm installed"
 }
 
+install_slstatus() {
+    local slstatus_dir="$HOME/.config/slstatus"
+
+    log_info "Setting up slstatus..."
+
+    # Create directory if it doesn't exist
+    if [[ ! -d "$slstatus_dir" ]]; then
+        mkdir -p "$slstatus_dir"
+    fi
+
+    # Clone if directory is empty
+    if [[ -z "$(ls -A "$slstatus_dir" 2>/dev/null)" ]]; then
+        log_info "Cloning slstatus..."
+        git clone https://git.suckless.org/slstatus "$slstatus_dir"
+    fi
+
+    # Compile and install
+    log_info "Compiling slstatus..."
+    cd "$slstatus_dir"
+    sudo make clean install
+    cd - >/dev/null
+
+    log_ok "slstatus installed"
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Desktop Session
 # ─────────────────────────────────────────────────────────────────────────────
@@ -190,6 +215,7 @@ EOF
         mkdir -p "$HOME/.config/dwm"
         cat > "$autostart" << 'EOF'
 #!/bin/sh
+slstatus &
 picom -b &
 feh --randomize --bg-fill ~/Pictures/backgrounds/* &
 nm-applet --indicator &
@@ -261,6 +287,7 @@ main() {
     install_packages
     install_yay
     install_dwm
+    install_slstatus
     setup_dwm_session
     configure_lightdm
     enable_services
