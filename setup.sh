@@ -311,7 +311,7 @@ install_cursor_theme() {
 
     log_info "Installing phinger-cursors..."
     mkdir -p "$icon_dir"
-    wget -cO- https://github.com/phisch/phinger-cursors/releases/latest/download/phinger-cursors-variants.tar.bz2 | tar xfj - -C "$icon_dir"
+    curl -fsSL https://github.com/phisch/phinger-cursors/releases/latest/download/phinger-cursors-variants.tar.bz2 | tar xfj - -C "$icon_dir"
     log_ok "Cursor theme installed"
 }
 
