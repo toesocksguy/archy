@@ -59,6 +59,10 @@ PACKAGES=(
     pipewire
     pipewire-pulse
     pavucontrol
+
+    # Network
+    networkmanager
+    network-manager-applet
 )
 
 # Packages that conflict with our desired packages
@@ -165,14 +169,15 @@ setup_dwm_session() {
     fi
 
     # Create .desktop file for display manager
+    # Note: using $HOME instead of ~ because .desktop files don't expand ~
     if [[ ! -f /usr/share/xsessions/dwm.desktop ]]; then
         log_info "Creating dwm.desktop..."
-        sudo tee /usr/share/xsessions/dwm.desktop > /dev/null << 'EOF'
+        sudo tee /usr/share/xsessions/dwm.desktop > /dev/null << EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=DWM
 Comment=the dynamic window manager
-Exec=~/.config/dwm/autostart.sh
+Exec=$HOME/.config/dwm/autostart.sh
 Icon=dwm
 Type=XSession
 EOF
@@ -199,6 +204,26 @@ EOF
 # ─────────────────────────────────────────────────────────────────────────────
 # Services
 # ─────────────────────────────────────────────────────────────────────────────
+
+configure_lightdm() {
+    log_info "Configuring LightDM..."
+
+    local conf="/etc/lightdm/lightdm.conf"
+
+    # Set slick-greeter as the greeter
+    if ! grep -q "^greeter-session=lightdm-slick-greeter" "$conf" 2>/dev/null; then
+        sudo sed -i '/^\[Seat:\*\]/a greeter-session=lightdm-slick-greeter' "$conf"
+        log_info "Set greeter to slick-greeter"
+    fi
+
+    # Set dwm as the default session
+    if ! grep -q "^user-session=dwm" "$conf" 2>/dev/null; then
+        sudo sed -i '/^\[Seat:\*\]/a user-session=dwm' "$conf"
+        log_info "Set default session to dwm"
+    fi
+
+    log_ok "LightDM configured"
+}
 
 enable_services() {
     log_info "Enabling services..."
@@ -237,6 +262,7 @@ main() {
     install_yay
     install_dwm
     setup_dwm_session
+    configure_lightdm
     enable_services
     log_ok "Setup complete!"
 }
