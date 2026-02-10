@@ -32,6 +32,8 @@ PACKAGES=(
     libx11
     libxft
     libxinerama
+    fontconfig
+    freetype2
 
     # Apps
     emacs
@@ -118,6 +120,35 @@ install_yay() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Suckless
+# ─────────────────────────────────────────────────────────────────────────────
+
+install_dwm() {
+    local dwm_dir="$HOME/.config/dwm"
+
+    log_info "Setting up dwm..."
+
+    # Create directory if it doesn't exist
+    if [[ ! -d "$dwm_dir" ]]; then
+        mkdir -p "$dwm_dir"
+    fi
+
+    # Clone if directory is empty
+    if [[ -z "$(ls -A "$dwm_dir" 2>/dev/null)" ]]; then
+        log_info "Cloning dwm..."
+        git clone https://git.suckless.org/dwm "$dwm_dir"
+    fi
+
+    # Compile and install
+    log_info "Compiling dwm..."
+    cd "$dwm_dir"
+    sudo make clean install
+    cd - >/dev/null
+
+    log_ok "dwm installed"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -128,6 +159,7 @@ main() {
     update_system
     install_packages
     install_yay
+    install_dwm
     log_ok "Setup complete!"
 }
 
