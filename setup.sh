@@ -5,6 +5,9 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_DIR="$SCRIPT_DIR/config"
+
 # Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -147,6 +150,12 @@ install_dwm() {
         git clone https://git.suckless.org/dwm "$dwm_dir"
     fi
 
+    # Copy custom config.h if available in repo
+    if [[ -f "$CONFIG_DIR/dwm/config.h" ]]; then
+        cp "$CONFIG_DIR/dwm/config.h" "$dwm_dir/config.h"
+        log_info "Applied custom dwm config.h"
+    fi
+
     # Compile and install
     log_info "Compiling dwm..."
     cd "$dwm_dir"
@@ -170,6 +179,12 @@ install_slstatus() {
     if [[ -z "$(ls -A "$slstatus_dir" 2>/dev/null)" ]]; then
         log_info "Cloning slstatus..."
         git clone https://git.suckless.org/slstatus "$slstatus_dir"
+    fi
+
+    # Copy custom config.h if available in repo
+    if [[ -f "$CONFIG_DIR/slstatus/config.h" ]]; then
+        cp "$CONFIG_DIR/slstatus/config.h" "$slstatus_dir/config.h"
+        log_info "Applied custom slstatus config.h"
     fi
 
     # Compile and install
@@ -276,6 +291,37 @@ enable_services() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Dotfiles
+# ─────────────────────────────────────────────────────────────────────────────
+
+deploy_configs() {
+    log_info "Deploying config files..."
+
+    # Config files to copy: source (in repo) -> destination
+    local -A configs=(
+        ["$CONFIG_DIR/emacs/init.el"]="$HOME/.config/emacs/init.el"
+        ["$CONFIG_DIR/ghostty/config"]="$HOME/.config/ghostty/config"
+        ["$CONFIG_DIR/picom/picom.conf"]="$HOME/.config/picom/picom.conf"
+        ["$CONFIG_DIR/rofi/config.rasi"]="$HOME/.config/rofi/config.rasi"
+    )
+
+    for src in "${!configs[@]}"; do
+        local dest="${configs[$src]}"
+
+        if [[ ! -f "$src" ]]; then
+            log_info "Skipping $(basename "$src") (not in repo)"
+            continue
+        fi
+
+        mkdir -p "$(dirname "$dest")"
+        cp "$src" "$dest"
+        log_info "Deployed $(basename "$src")"
+    done
+
+    log_ok "Config files deployed"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -289,6 +335,7 @@ main() {
     install_dwm
     install_slstatus
     setup_dwm_session
+    deploy_configs
     configure_lightdm
     enable_services
     log_ok "Setup complete!"

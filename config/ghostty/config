@@ -1,0 +1,38 @@
+# ~/.config/ghostty/config
+
+# ── Appearance ──────────────────────────────────────────────
+# Catppuccin theme (Mocha variant – dark, popular for terminals)
+theme = Cyberpunk
+
+# Font settings
+font-family = "JetBrains Mono"
+font-size = 13
+
+# Transparency
+background-opacity = 0.92
+
+# ── Behavior ────────────────────────────────────────────────
+# Use login shell
+#shell = login
+
+# Disable audible/visual bell
+#bell = none
+
+# ── Tabs ────────────────────────────────────────────────────
+# Keep tabs simple, enable tab bar
+#tab-bar = true
+#tab-bar-style = native
+#tab-title-template = "{title}"
+
+# Hide window title bar (like kitty)
+window-decoration = none
+
+# ── Misc ────────────────────────────────────────────────────
+# Reasonable scrollback
+#scrollback-lines = 10000
+
+# ── Cursor ──────────────────────────────────────────────────
+# cursor-style = block
+# cursor-blink = true
+# cursor-trail = true
+# cursor-trail-length = 0.15
