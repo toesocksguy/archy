@@ -8,8 +8,9 @@ An idempotent setup script for a dwm-based Arch Linux desktop environment.
 - Installs packages via pacman
 - Installs yay (AUR helper)
 - Compiles and installs dwm from suckless.org
+- Compiles and installs slstatus from suckless.org
 - Configures LightDM with slick-greeter
-- Sets up dwm desktop session
+- Sets up dwm desktop session (autostart.sh)
 - Enables system services (NetworkManager, LightDM, pipewire)
 
 ## Usage
@@ -116,11 +117,37 @@ sudo sed -i '/^\[Seat:\*\]/a user-session=dwm' /etc/lightdm/lightdm.conf
 |------|-------------|
 | `/usr/share/xsessions/dwm.desktop` | Desktop session file for LightDM |
 | `~/.config/dwm/` | dwm source and config |
-| `~/.config/dwm/autostart.sh` | Startup script (picom, feh, nm-applet, dwm) |
+| `~/.config/dwm/autostart.sh` | Startup script (slstatus, picom, feh, nm-applet, dwm) |
+| `~/.config/slstatus/` | slstatus source and config |
 | `/etc/lightdm/lightdm.conf` | LightDM configuration |
+
+## Status Bar (slstatus)
+
+slstatus is a suckless status monitor that feeds text to dwm's built-in bar. It's a single compiled C binary with no shell overhead.
+
+### Why slstatus?
+
+| Method | Weight | How it works |
+|--------|--------|-------------|
+| **slstatus** | Lightest | Single C binary, reads system info directly |
+| **dwmblocks** | Medium | C binary, but forks shell scripts per block |
+| **bash script** | Heaviest | Shell loop, forks subprocesses every iteration |
+| **polybar** | Heaviest | C++ with many dependencies, replaces dwm bar entirely |
+
+### Customizing
+
+Edit `~/.config/slstatus/config.h` to configure which components are displayed, then recompile:
+
+```bash
+cd ~/.config/slstatus
+sudo make clean install
+```
+
+### Available Components
+
+Battery, CPU usage/frequency, date/time, disk stats, memory/swap, network speeds, volume, WiFi signal, temperature, uptime, keyboard layout, hostname, kernel version, load average, and custom shell commands.
 
 ## TODO
 
-- [ ] Status bar configuration
 - [ ] Dotfiles management
 - [ ] Additional packages (screenshot tools, brightness control, etc.)
