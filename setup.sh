@@ -360,6 +360,7 @@ deploy_configs() {
         ["$CONFIG_DIR/ghostty/config"]="$HOME/.config/ghostty/config"
         ["$CONFIG_DIR/picom/picom.conf"]="$HOME/.config/picom/picom.conf"
         ["$CONFIG_DIR/rofi/config.rasi"]="$HOME/.config/rofi/config.rasi"
+        ["$CONFIG_DIR/bashrc"]="$HOME/.bashrc"
     )
 
     for src in "${!configs[@]}"; do

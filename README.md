@@ -11,7 +11,7 @@ An idempotent setup script for a dwm-based Arch Linux desktop environment.
 - Compiles and installs slstatus from suckless.org
 - Configures LightDM with slick-greeter
 - Sets up dwm desktop session (autostart.sh)
-- Deploys config files (emacs, ghostty, picom, rofi, dwm, slstatus, Xresources)
+- Deploys config files (bashrc, emacs, ghostty, picom, rofi, dwm, slstatus, Xresources)
 - Installs phinger-cursors cursor theme
 - Creates wallpaper directory
 - Enables system services (NetworkManager, LightDM, pipewire)
@@ -143,6 +143,7 @@ rules = (
 | `~/.config/dwm/` | dwm source and config |
 | `~/.config/dwm/autostart.sh` | Startup script (slstatus, picom, feh, nm-applet, dwm) |
 | `~/.config/slstatus/` | slstatus source and config |
+| `~/.bashrc` | Shell configuration |
 | `~/.Xresources` | X cursor theme config |
 | `~/.local/share/icons/phinger-cursors-light/` | Cursor theme files |
 | `~/Pictures/backgrounds/` | Wallpapers for feh |
@@ -192,7 +193,8 @@ config/
 │   └── picom.conf
 ├── rofi/
 │   └── config.rasi
-└── Xresources            # copied to ~/.Xresources
+├── Xresources            # copied to ~/.Xresources
+└── bashrc                # copied to ~/.bashrc
 ```
 
 To update the repo after making changes to live configs, copy them back:
@@ -202,6 +204,5 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 
 ## TODO
 
-- [ ] Shell configuration (bashrc, bash_profile)
 - [ ] Screenshot keybinding in dwm config.h
 - [ ] Wallpapers
