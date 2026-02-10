@@ -11,6 +11,7 @@ An idempotent setup script for a dwm-based Arch Linux desktop environment.
 - Compiles and installs slstatus from suckless.org
 - Configures LightDM with slick-greeter
 - Sets up dwm desktop session (autostart.sh)
+- Deploys config files (emacs, ghostty, picom, rofi, dwm, slstatus)
 - Enables system services (NetworkManager, LightDM, pipewire)
 
 ## Usage
@@ -32,13 +33,13 @@ chmod +x setup.sh
 - libx11, libxft, libxinerama, fontconfig, freetype2
 
 ### Applications
-- emacs, ghostty, picom, rofi, thunar
+- emacs, ghostty, picom, rofi, thunar, firefox
 
 ### Display Manager
 - lightdm, lightdm-slick-greeter
 
 ### Utilities
-- fzf, ripgrep, feh, mise
+- fzf, ripgrep, feh, mise, xclip, maim, slop, dmenu
 
 ### Fonts
 - ttf-jetbrains-mono-nerd
@@ -107,6 +108,27 @@ sudo sed -i '/^\[Seat:\*\]/a greeter-session=lightdm-slick-greeter' /etc/lightdm
 sudo sed -i '/^\[Seat:\*\]/a user-session=dwm' /etc/lightdm/lightdm.conf
 ```
 
+### dwm config.h Mismatch
+
+**Problem:** dwm fails to compile with `'refreshrate' undeclared`.
+
+**Cause:** The repo's `config.h` was from an older dwm version. The latest dwm source added a `refreshrate` variable.
+
+**Solution:** Ensure `config/dwm/config.h` stays in sync with the latest dwm source. When new variables are added to `config.def.h` upstream, add them to your `config.h`.
+
+### picom Deprecated Options
+
+**Problem:** picom warns about `blur-background-exclude`.
+
+**Cause:** picom v12+ replaced legacy blur options with a window rules system.
+
+**Solution:** Move blur exclusions into the `rules` section:
+```
+rules = (
+    { match = "class_g = 'Firefox'"; blur-background = false; }
+);
+```
+
 ### QEMU/KVM Video Driver
 
 **Note:** For VMs using QEMU/KVM, you may need to install `xf86-video-qxl` for proper display.
@@ -147,7 +169,31 @@ sudo make clean install
 
 Battery, CPU usage/frequency, date/time, disk stats, memory/swap, network speeds, volume, WiFi signal, temperature, uptime, keyboard layout, hostname, kernel version, load average, and custom shell commands.
 
+## Dotfiles
+
+Config files are stored in `config/` and copied to `~/.config/` during setup.
+
+```
+config/
+├── dwm/
+│   └── config.h          # copied into cloned dwm source before compiling
+├── slstatus/
+│   └── config.h          # copied into cloned slstatus source before compiling
+├── emacs/
+│   └── init.el
+├── ghostty/
+│   └── config
+├── picom/
+│   └── picom.conf
+└── rofi/
+    └── config.rasi
+```
+
+To update the repo after making changes to live configs, copy them back:
+```bash
+cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
+```
+
 ## TODO
 
-- [ ] Dotfiles management
 - [ ] Additional packages (screenshot tools, brightness control, etc.)

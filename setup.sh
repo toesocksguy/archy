@@ -54,6 +54,13 @@ PACKAGES=(
     ripgrep
     feh
     mise
+    xclip
+    maim
+    slop
+    dmenu
+
+    # Browsers
+    firefox
 
     # Fonts
     ttf-jetbrains-mono-nerd
