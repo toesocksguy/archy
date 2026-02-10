@@ -35,6 +35,7 @@ PACKAGES=(
 
     # Apps
     emacs
+    ghostty
     picom
     rofi
     thunar
@@ -43,6 +44,7 @@ PACKAGES=(
     fzf
     ripgrep
     feh
+    mise
 
     # Fonts
     ttf-jetbrains-mono-nerd
@@ -95,6 +97,27 @@ install_packages() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# AUR Helper
+# ─────────────────────────────────────────────────────────────────────────────
+
+install_yay() {
+    if command -v yay &>/dev/null; then
+        log_ok "yay already installed"
+        return
+    fi
+
+    log_info "Installing yay..."
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    git clone https://aur.archlinux.org/yay.git "$tmp_dir/yay"
+    cd "$tmp_dir/yay"
+    makepkg -si --noconfirm
+    cd - >/dev/null
+    rm -rf "$tmp_dir"
+    log_ok "yay installed"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -104,6 +127,7 @@ main() {
 
     update_system
     install_packages
+    install_yay
     log_ok "Setup complete!"
 }
 
