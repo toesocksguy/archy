@@ -42,6 +42,10 @@ PACKAGES=(
     rofi
     thunar
 
+    # Display manager
+    lightdm
+    lightdm-slick-greeter
+
     # Utils
     fzf
     ripgrep
@@ -149,6 +153,78 @@ install_dwm() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Desktop Session
+# ─────────────────────────────────────────────────────────────────────────────
+
+setup_dwm_session() {
+    log_info "Setting up dwm session..."
+
+    # Create xsessions directory if needed
+    if [[ ! -d /usr/share/xsessions ]]; then
+        sudo mkdir -p /usr/share/xsessions
+    fi
+
+    # Create .desktop file for display manager
+    if [[ ! -f /usr/share/xsessions/dwm.desktop ]]; then
+        log_info "Creating dwm.desktop..."
+        sudo tee /usr/share/xsessions/dwm.desktop > /dev/null << 'EOF'
+[Desktop Entry]
+Encoding=UTF-8
+Name=DWM
+Comment=the dynamic window manager
+Exec=~/.config/dwm/autostart.sh
+Icon=dwm
+Type=XSession
+EOF
+    fi
+
+    # Create autostart.sh
+    local autostart="$HOME/.config/dwm/autostart.sh"
+    if [[ ! -f "$autostart" ]]; then
+        log_info "Creating autostart.sh..."
+        mkdir -p "$HOME/.config/dwm"
+        cat > "$autostart" << 'EOF'
+#!/bin/sh
+picom -b &
+feh --randomize --bg-fill ~/Pictures/backgrounds/* &
+nm-applet --indicator &
+exec dwm
+EOF
+        chmod +x "$autostart"
+    fi
+
+    log_ok "dwm session configured"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Services
+# ─────────────────────────────────────────────────────────────────────────────
+
+enable_services() {
+    log_info "Enabling services..."
+
+    # NetworkManager
+    if ! systemctl is-enabled NetworkManager &>/dev/null; then
+        sudo systemctl enable NetworkManager
+        log_info "Enabled NetworkManager"
+    fi
+
+    # LightDM
+    if ! systemctl is-enabled lightdm &>/dev/null; then
+        sudo systemctl enable lightdm
+        log_info "Enabled LightDM"
+    fi
+
+    # Pipewire (user service - enabled by default on Arch, but just in case)
+    if ! systemctl --user is-enabled pipewire &>/dev/null 2>&1; then
+        systemctl --user enable pipewire pipewire-pulse
+        log_info "Enabled pipewire"
+    fi
+
+    log_ok "Services enabled"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -160,6 +236,8 @@ main() {
     install_packages
     install_yay
     install_dwm
+    setup_dwm_session
+    enable_services
     log_ok "Setup complete!"
 }
 
