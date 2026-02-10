@@ -164,9 +164,11 @@ install_dwm() {
     fi
 
     # Compile and install
+    # Only use sudo for install, not compile, to avoid root-owned files
     log_info "Compiling dwm..."
     cd "$dwm_dir"
-    sudo make clean install
+    make clean
+    sudo make install
     cd - >/dev/null
 
     log_ok "dwm installed"
@@ -195,9 +197,11 @@ install_slstatus() {
     fi
 
     # Compile and install
+    # Only use sudo for install, not compile, to avoid root-owned files
     log_info "Compiling slstatus..."
     cd "$slstatus_dir"
-    sudo make clean install
+    make clean
+    sudo make install
     cd - >/dev/null
 
     log_ok "slstatus installed"
