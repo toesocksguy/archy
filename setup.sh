@@ -298,6 +298,56 @@ enable_services() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Cursor Theme
+# ─────────────────────────────────────────────────────────────────────────────
+
+install_cursor_theme() {
+    local icon_dir="$HOME/.local/share/icons"
+
+    if [[ -d "$icon_dir/phinger-cursors-light" ]]; then
+        log_ok "Cursor theme already installed"
+        return
+    fi
+
+    log_info "Installing phinger-cursors..."
+    mkdir -p "$icon_dir"
+    wget -cO- https://github.com/phisch/phinger-cursors/releases/latest/download/phinger-cursors-variants.tar.bz2 | tar xfj - -C "$icon_dir"
+    log_ok "Cursor theme installed"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Xresources
+# ─────────────────────────────────────────────────────────────────────────────
+
+setup_xresources() {
+    log_info "Setting up Xresources..."
+
+    if [[ -f "$CONFIG_DIR/Xresources" ]]; then
+        cp "$CONFIG_DIR/Xresources" "$HOME/.Xresources"
+        log_info "Deployed .Xresources"
+    fi
+
+    log_ok "Xresources configured"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Wallpapers
+# ─────────────────────────────────────────────────────────────────────────────
+
+setup_wallpapers() {
+    local wall_dir="$HOME/Pictures/backgrounds"
+
+    if [[ -d "$wall_dir" ]]; then
+        log_ok "Wallpaper directory exists"
+        return
+    fi
+
+    log_info "Creating wallpaper directory..."
+    mkdir -p "$wall_dir"
+    log_ok "Created $wall_dir"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Dotfiles
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -343,6 +393,9 @@ main() {
     install_slstatus
     setup_dwm_session
     deploy_configs
+    install_cursor_theme
+    setup_xresources
+    setup_wallpapers
     configure_lightdm
     enable_services
     log_ok "Setup complete!"
