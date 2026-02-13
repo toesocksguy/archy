@@ -365,6 +365,8 @@ deploy_configs() {
         ["$CONFIG_DIR/picom/picom.conf"]="$HOME/.config/picom/picom.conf"
         ["$CONFIG_DIR/rofi/config.rasi"]="$HOME/.config/rofi/config.rasi"
         ["$CONFIG_DIR/bashrc"]="$HOME/.bashrc"
+        ["$CONFIG_DIR/gtk-3.0/settings.ini"]="$HOME/.config/gtk-3.0/settings.ini"
+        ["$CONFIG_DIR/gtk-4.0/settings.ini"]="$HOME/.config/gtk-4.0/settings.ini"
     )
 
     for src in "${!configs[@]}"; do

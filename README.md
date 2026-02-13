@@ -214,3 +214,4 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 
 - [ ] Screenshot keybinding in dwm config.h
 - [ ] Wallpapers
+- [ ] Add option for alternative display manager (Ly, etc.)

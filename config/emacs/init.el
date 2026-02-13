@@ -29,7 +29,7 @@
 
 ;; Set default font
 (set-face-attribute 'default nil
-                    :family "MesloLGM Nerd Font"
+                    :family "JetBrainsMono Nerd Font"
                     :weight 'regular
                     :height 110)
 
