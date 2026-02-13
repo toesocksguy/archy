@@ -163,6 +163,14 @@ install_dwm() {
         log_info "Applied custom dwm config.h"
     fi
 
+    # Copy scripts if available
+    if [[ -d "$CONFIG_DIR/dwm/scripts" ]]; then
+        mkdir -p "$dwm_dir/scripts"
+        cp "$CONFIG_DIR/dwm/scripts/"* "$dwm_dir/scripts/"
+        chmod +x "$dwm_dir/scripts/"*
+        log_info "Deployed dwm scripts"
+    fi
+
     # Compile and install
     # Only use sudo for install, not compile, to avoid root-owned files
     log_info "Compiling dwm..."
