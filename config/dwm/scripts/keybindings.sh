@@ -3,7 +3,7 @@
 # Display dwm keybindings in rofi
 #
 
-rofi -dmenu -i -p "Help" -no-custom << 'EOF'
+rofi -dmenu -i -p "Keybindings" -no-custom << 'EOF'
 Super+p             Rofi launcher
 Super+Shift+p       dmenu
 Super+Shift+Return  Terminal (ghostty)

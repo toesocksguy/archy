@@ -37,6 +37,9 @@ PACKAGES=(
     libxinerama
     fontconfig
     freetype2
+    libxcb
+    xcb-util-wm
+    libxres
 
     # Apps
     emacs
@@ -155,6 +158,36 @@ install_dwm() {
     if [[ -z "$(ls -A "$dwm_dir" 2>/dev/null)" ]]; then
         log_info "Cloning dwm..."
         git clone https://git.suckless.org/dwm "$dwm_dir"
+    fi
+
+    # Apply patches (only on fresh clone, before config.h is copied)
+    if [[ ! -f "$dwm_dir/.patched" ]]; then
+        local patches=(
+            "https://dwm.suckless.org/patches/pertag/dwm-pertag-20200914-61bb8b2.diff"
+            "https://dwm.suckless.org/patches/swallow/dwm-swallow-6.3.diff"
+        )
+
+        cd "$dwm_dir"
+        for url in "${patches[@]}"; do
+            local name
+            name=$(basename "$url")
+            local patch_file
+            patch_file=$(mktemp)
+
+            log_info "Downloading $name..."
+            curl -fsSL "$url" -o "$patch_file"
+
+            if git apply --check "$patch_file" 2>/dev/null; then
+                log_info "Applying $name..."
+                git apply "$patch_file"
+            else
+                log_info "$name has conflicts, skipping"
+            fi
+            rm -f "$patch_file"
+        done
+        cd - >/dev/null
+
+        touch "$dwm_dir/.patched"
     fi
 
     # Copy custom config.h if available in repo
