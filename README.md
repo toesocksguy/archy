@@ -220,7 +220,7 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 
 **System/Desktop:**
 - [x] `dunst` - notification daemon
-- [ ] `lxpolkit` - polkit agent for GUI privilege prompts (Thunar mounting, etc.)
+- [x] `lxsession` - polkit agent for GUI privilege prompts (Thunar mounting, etc.)
 - [ ] `xdg-user-dirs` - auto-creates standard dirs (~/Pictures, ~/Downloads, etc.)
 
 **Thunar support:**

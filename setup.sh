@@ -68,6 +68,9 @@ PACKAGES=(
     # Notifications
     dunst
 
+    # Polkit agent
+    lxsession
+
     # Fonts
     ttf-jetbrains-mono-nerd
 
@@ -287,6 +290,7 @@ EOF
 #!/bin/sh
 slstatus &
 dunst &
+lxsession &
 picom -b &
 feh --randomize --bg-fill ~/Pictures/backgrounds/* &
 nm-applet --indicator &
