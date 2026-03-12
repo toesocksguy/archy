@@ -215,3 +215,24 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 - [ ] Screenshot keybinding in dwm config.h
 - [ ] Wallpapers
 - [ ] Add option for alternative display manager (Ly, etc.)
+
+### Potential Packages to Add
+
+**System/Desktop:**
+- [x] `dunst` - notification daemon
+- [ ] `lxpolkit` - polkit agent for GUI privilege prompts (Thunar mounting, etc.)
+- [ ] `xdg-user-dirs` - auto-creates standard dirs (~/Pictures, ~/Downloads, etc.)
+
+**Thunar support:**
+- [ ] `gvfs` - trash, drive mounting, network shares
+- [ ] `tumbler` - thumbnail previews
+
+**Media/keybindings:**
+- [ ] `pamixer` - CLI volume control
+- [ ] `brightnessctl` - brightness control
+- [ ] `playerctl` - media player controls (play/pause/next)
+
+**Utilities:**
+- [ ] `unzip` - archive extraction
+- [ ] `man-db` - man pages
+- [ ] `redshift` - blue light filter

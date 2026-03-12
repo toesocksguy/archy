@@ -1,0 +1,46 @@
+[global]
+    # Position
+    origin = top-right
+    offset = 10x10
+
+    # Size
+    width = 300
+    height = 150
+    gap_size = 5
+
+    # Font
+    font = JetBrainsMono Nerd Font 10
+
+    # Padding
+    padding = 10
+    horizontal_padding = 12
+    text_icon_padding = 10
+
+    # Border
+    frame_width = 2
+    corner_radius = 6
+
+    # Misc
+    separator_height = 2
+    sort = yes
+    word_wrap = yes
+    markup = full
+    format = "<b>%s</b>\n%b"
+
+[urgency_low]
+    background = "#332a57"
+    foreground = "#e5e5e5"
+    frame_color = "#00fbac"
+    timeout = 4
+
+[urgency_normal]
+    background = "#332a57"
+    foreground = "#e5e5e5"
+    frame_color = "#00bfff"
+    timeout = 6
+
+[urgency_high]
+    background = "#332a57"
+    foreground = "#e5e5e5"
+    frame_color = "#ff7092"
+    timeout = 10
