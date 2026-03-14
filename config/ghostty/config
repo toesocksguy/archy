@@ -1,11 +1,10 @@
 # ~/.config/ghostty/config
 
 # ── Appearance ──────────────────────────────────────────────
-# Catppuccin theme (Mocha variant – dark, popular for terminals)
-theme = Cyberpunk
+theme = Gruvbox Material Dark
 
 # Font settings
-font-family = "JetBrains Mono"
+font-family = "JetBrainsMono Nerd Font Mono"
 font-size = 13
 
 # Transparency
