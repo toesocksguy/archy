@@ -74,6 +74,10 @@ PACKAGES=(
     # Fonts
     ttf-jetbrains-mono-nerd
 
+    # GTK theme build dependencies
+    sassc
+    gnome-themes-extra
+
     # Audio
     pipewire
     pipewire-pulse
@@ -144,6 +148,47 @@ install_yay() {
     cd - >/dev/null
     rm -rf "$tmp_dir"
     log_ok "yay installed"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AUR Packages
+# ─────────────────────────────────────────────────────────────────────────────
+
+AUR_PACKAGES=(
+    gruvbox-plus-icon-theme
+)
+
+install_aur_packages() {
+    log_info "Installing AUR packages..."
+    yay -S --needed --noconfirm "${AUR_PACKAGES[@]}"
+    log_ok "AUR packages installed"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Gruvbox GTK Theme
+# ─────────────────────────────────────────────────────────────────────────────
+
+install_gruvbox_gtk_theme() {
+    local theme_dir="$HOME/.themes/Gruvbox-Dark-B"
+
+    if [[ -d "$theme_dir" ]]; then
+        log_ok "Gruvbox GTK theme already installed"
+        return
+    fi
+
+    log_info "Installing Gruvbox GTK theme..."
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    git clone https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme "$tmp_dir/Gruvbox-GTK-Theme"
+
+    # Install dark medium variant with orange accent
+    # -l flag automatically symlinks GTK4 CSS into ~/.config/gtk-4.0/
+    cd "$tmp_dir/Gruvbox-GTK-Theme/themes"
+    ./install.sh --tweaks medium -c dark -t orange -l
+    cd - >/dev/null
+
+    rm -rf "$tmp_dir"
+    log_ok "Gruvbox GTK theme installed"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -413,6 +458,7 @@ deploy_configs() {
         ["$CONFIG_DIR/ghostty/config"]="$HOME/.config/ghostty/config"
         ["$CONFIG_DIR/picom/picom.conf"]="$HOME/.config/picom/picom.conf"
         ["$CONFIG_DIR/rofi/config.rasi"]="$HOME/.config/rofi/config.rasi"
+        ["$CONFIG_DIR/rofi/gruvbox-material.rasi"]="$HOME/.config/rofi/gruvbox-material.rasi"
         ["$CONFIG_DIR/bashrc"]="$HOME/.bashrc"
         ["$CONFIG_DIR/dunst/dunstrc"]="$HOME/.config/dunst/dunstrc"
         ["$CONFIG_DIR/gtk-3.0/settings.ini"]="$HOME/.config/gtk-3.0/settings.ini"
@@ -446,6 +492,8 @@ main() {
     update_system
     install_packages
     install_yay
+    install_aur_packages
+    install_gruvbox_gtk_theme
     install_dwm
     install_slstatus
     setup_dwm_session

@@ -1,1 +1,10 @@
-@theme "/usr/share/rofi/themes/sidebar.rasi"
+configuration {
+    modes:              [ drun ];
+    font:               "JetBrains Mono 11";
+    show-icons:         true;
+    icon-theme:         "Gruvbox-Plus-Dark";
+    drun-display-format: "{name}";
+    display-drun:       "";
+}
+
+@theme "~/.config/rofi/gruvbox-material.rasi"

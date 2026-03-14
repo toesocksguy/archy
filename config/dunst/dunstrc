@@ -1,46 +1,81 @@
 [global]
-    # Position
-    origin = top-right
-    offset = 10x10
+    ### Display ###
+    monitor = 0
+    follow = none
 
-    # Size
-    width = 300
-    height = 150
-    gap_size = 5
+    ### Geometry ###
+    width = 320
+    height = 200
+    origin = top-center
+    offset = 0x20
+    scale = 0
+    notification_limit = 5
 
-    # Font
-    font = JetBrainsMono Nerd Font 10
-
-    # Padding
+    ### Layout ###
     padding = 10
     horizontal_padding = 12
     text_icon_padding = 10
-
-    # Border
     frame_width = 2
-    corner_radius = 6
-
-    # Misc
+    gap_size = 6
+    corner_radius = 4
     separator_height = 2
-    sort = yes
-    word_wrap = yes
+    separator_color = frame
+
+    ### Icons ###
+    icon_theme = "Gruvbox-Plus-Dark,Adwaita"
+    enable_recursive_icon_lookup = true
+    icon_position = left
+    min_icon_size = 24
+    max_icon_size = 32
+
+    ### Text ###
+    font = JetBrains Mono 10
+    line_height = 2
     markup = full
     format = "<b>%s</b>\n%b"
+    alignment = left
+    vertical_alignment = center
+    word_wrap = yes
+    ellipsize = middle
+    ignore_newline = no
+    stack_duplicates = true
+    hide_duplicate_count = false
+    show_indicators = yes
+
+    ### Behaviour ###
+    sticky_history = yes
+    history_length = 20
+    always_run_script = true
+    title = Dunst
+    class = Dunst
+    ignore_dbusclose = false
+
+    ### Mouse ###
+    mouse_left_click = close_current
+    mouse_middle_click = do_action, close_current
+    mouse_right_click = close_all
+
+    ### Misc ###
+    dmenu = /usr/bin/rofi -p dunst -dmenu
+    browser = /usr/bin/xdg-open
 
 [urgency_low]
-    background = "#332a57"
-    foreground = "#e5e5e5"
-    frame_color = "#00fbac"
-    timeout = 4
+    background = "#282828"
+    foreground = "#a89984"
+    frame_color = "#504945"
+    timeout = 3
+    #icon = /path/to/icon
 
 [urgency_normal]
-    background = "#332a57"
-    foreground = "#e5e5e5"
-    frame_color = "#00bfff"
-    timeout = 6
+    background = "#282828"
+    foreground = "#ebdbb2"
+    frame_color = "#83a598"
+    timeout = 3
+    #icon = /path/to/icon
 
-[urgency_high]
-    background = "#332a57"
-    foreground = "#e5e5e5"
-    frame_color = "#ff7092"
-    timeout = 10
+[urgency_critical]
+    background = "#282828"
+    foreground = "#fb4934"
+    frame_color = "#cc241d"
+    timeout = 0
+    #icon = /path/to/icon

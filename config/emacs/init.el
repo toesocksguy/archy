@@ -24,10 +24,16 @@
 ;; UI / Basic Settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Disable GUI chrome
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+
 ;; Enable line numbers globally
 (global-display-line-numbers-mode t)
 
 ;; Set default font
+;; Note: run `fc-list | grep -i jetbrains` to confirm exact family name
 (set-face-attribute 'default nil
                     :family "JetBrainsMono Nerd Font"
                     :weight 'regular
@@ -41,26 +47,6 @@
   :config
   (which-key-mode))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; org-roam - backlinked knowledgebase
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package org-roam
-  :ensure t
-  :custom
-  (org-roam-directory (file-truename "~/org-roam"))
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n g" . org-roam-graph)
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n c" . org-roam-capture)
-         ;; Dailies
-         ("C-c n j" . org-roam-dailies-capture-today))
-  :config
-  ;; If you're using a vertical completion framework, you might want a more informative completion interface
-  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-  (org-roam-db-autosync-mode))
-  ;; If using org-roam-protocol
-  ;; (require 'org-roam-protocol))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Completion Suite – vertico, orderless, marginalia, consult
@@ -131,7 +117,7 @@
 ;; Doom UI packages – themes, modeline, icons
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package doom-themes
-  :config (load-theme 'doom-one t))
+  :config (load-theme 'gruvbox-dark-medium t))
 
 (use-package all-the-icons
   :if (display-graphic-p))
@@ -186,7 +172,7 @@ _A_:ample
   ("f" (load-theme 'ef-dark t))
   ("h" (load-theme 'hc-zenburn t))
   ("p" (load-theme 'spacemacs-dark t))
-e  ("r" (load-theme 'dracula t))
+  ("r" (load-theme 'dracula t))
   ("y" (load-theme 'gruber-darker t))
   ("A" (load-theme 'ample t))
   ("q" nil "quit"))
@@ -197,6 +183,10 @@ e  ("r" (load-theme 'dracula t))
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("5a0ddbd75929d24f5ef34944d78789c6c3421aa943c15218bac791c199fc897d"
+     "e8ceeba381ba723b59a9abc4961f41583112fc7dc0e886d9fc36fa1dc37b4079"
+     default))
  '(package-selected-packages
    '(all-the-icons ample-theme ayu-theme catppuccin-theme csv-mode
 		   doom-modeline doom-themes dracula-theme ef-themes
