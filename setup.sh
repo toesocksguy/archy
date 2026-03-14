@@ -169,9 +169,9 @@ install_aur_packages() {
 # ─────────────────────────────────────────────────────────────────────────────
 
 install_gruvbox_gtk_theme() {
-    local theme_dir="$HOME/.themes/Gruvbox-Dark-B"
+    local theme_dir="$HOME/.themes/Gruvbox-Orange-Dark-Medium"
 
-    if [[ -d "$theme_dir" ]]; then
+    if [[ -d "$theme_dir/gtk-3.0" ]]; then
         log_ok "Gruvbox GTK theme already installed"
         return
     fi
