@@ -145,6 +145,7 @@ PACKAGES=(
 CONFLICTING_PACKAGES=(
     pulseaudio
     pulseaudio-bluetooth
+    jack2
 )
 
 # Remove conflicting packages before installing new ones
