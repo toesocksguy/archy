@@ -115,7 +115,6 @@ PACKAGES=(
     pipewire
     pipewire-pulse
     pipewire-alsa
-    pipewire-jack
     wireplumber
     pavucontrol
 
@@ -145,7 +144,6 @@ PACKAGES=(
 CONFLICTING_PACKAGES=(
     pulseaudio
     pulseaudio-bluetooth
-    jack2
 )
 
 # Remove conflicting packages before installing new ones
