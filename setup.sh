@@ -74,8 +74,38 @@ PACKAGES=(
     # XDG user directories
     xdg-user-dirs
 
+    # Thunar support
+    gvfs
+    tumbler
+    thunar-archive-plugin
+    thunar-volman
+
+    # Filesystem support
+    ntfs-3g
+
     # Fonts
     ttf-jetbrains-mono-nerd
+    noto-fonts
+    noto-fonts-emoji
+
+    # Utilities
+    unzip
+    zip
+    man-db
+    wget
+    which
+    tree
+    htop
+    xdotool
+    fastfetch
+    mpv
+    bash-completion
+
+    # Shell/CLI tools
+    bat
+    eza
+    zoxide
+    fd
 
     # GTK theme build dependencies
     sassc
@@ -84,11 +114,30 @@ PACKAGES=(
     # Audio
     pipewire
     pipewire-pulse
+    pipewire-alsa
+    pipewire-jack
+    wireplumber
     pavucontrol
 
     # Network
     networkmanager
     network-manager-applet
+
+    # Bluetooth
+    bluez
+    bluez-utils
+    blueman
+
+    # Containers
+    docker
+    docker-compose
+
+    # Media
+    yt-dlp
+
+    # System
+    reflector
+    timeshift
 )
 
 # Packages that conflict with our desired packages
@@ -387,6 +436,22 @@ enable_services() {
     if ! systemctl is-enabled lightdm &>/dev/null; then
         sudo systemctl enable lightdm
         log_info "Enabled LightDM"
+    fi
+
+    # Bluetooth
+    if ! systemctl is-enabled bluetooth &>/dev/null; then
+        sudo systemctl enable bluetooth
+        log_info "Enabled bluetooth"
+    fi
+
+    # Docker
+    if ! systemctl is-enabled docker &>/dev/null; then
+        sudo systemctl enable docker
+        log_info "Enabled docker"
+    fi
+    if ! groups "$USER" | grep -q docker; then
+        sudo usermod -aG docker "$USER"
+        log_info "Added $USER to docker group"
     fi
 
     # Pipewire (user service - enabled by default on Arch, but just in case)

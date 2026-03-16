@@ -14,7 +14,10 @@ An idempotent setup script for a dwm-based Arch Linux desktop environment.
 - Deploys config files (bashrc, emacs, kitty, picom, rofi, dwm, slstatus, Xresources)
 - Installs phinger-cursors cursor theme
 - Creates wallpaper directory
-- Enables system services (NetworkManager, LightDM, pipewire)
+- Installs AUR packages (gruvbox-plus-icon-theme)
+- Installs Gruvbox GTK theme
+- Sets up XDG user directories
+- Enables system services (NetworkManager, LightDM, pipewire, bluetooth, docker)
 
 ## Usage
 
@@ -35,22 +38,37 @@ chmod +x setup.sh
 - libx11, libxft, libxinerama, fontconfig, freetype2
 
 ### Applications
-- emacs, kitty, picom, rofi, thunar, firefox
+- emacs, kitty, picom, rofi, thunar, firefox, mpv
 
 ### Display Manager
 - lightdm, lightdm-slick-greeter
 
+### Thunar Support
+- gvfs, tumbler, thunar-archive-plugin, thunar-volman
+
 ### Utilities
-- fzf, ripgrep, feh, mise, xclip, maim, slop, dmenu
+- fzf, ripgrep, feh, mise, xclip, maim, slop, dmenu, unzip, zip, man-db, wget, which, tree, htop, xdotool, fastfetch, bat, eza, zoxide, fd, bash-completion, yt-dlp
 
 ### Fonts
-- ttf-jetbrains-mono-nerd
+- ttf-jetbrains-mono-nerd, noto-fonts, noto-fonts-emoji
 
 ### Audio
-- pipewire, pipewire-pulse, pavucontrol
+- pipewire, pipewire-pulse, pipewire-alsa, pipewire-jack, wireplumber, pavucontrol
 
 ### Network
 - networkmanager, network-manager-applet
+
+### Bluetooth
+- bluez, bluez-utils, blueman
+
+### Containers
+- docker, docker-compose
+
+### System
+- reflector, timeshift, ntfs-3g, xdg-user-dirs
+
+### AUR
+- gruvbox-plus-icon-theme
 
 ## Troubleshooting Notes
 
@@ -205,9 +223,11 @@ Config files are stored in `config/` and copied to `~/.config/` during setup.
 ```
 config/
 ├── dwm/
-│   └── config.h          # copied into cloned dwm source before compiling
+│   ├── config.h              # copied into cloned dwm source before compiling
+│   └── scripts/
+│       └── keybindings.sh    # rofi keybindings help (Super+Shift+h)
 ├── slstatus/
-│   └── config.h          # copied into cloned slstatus source before compiling
+│   └── config.h              # copied into cloned slstatus source before compiling
 ├── emacs/
 │   └── init.el
 ├── kitty/
@@ -216,9 +236,16 @@ config/
 ├── picom/
 │   └── picom.conf
 ├── rofi/
-│   └── config.rasi
-├── Xresources            # copied to ~/.Xresources
-└── bashrc                # copied to ~/.bashrc
+│   ├── config.rasi
+│   └── gruvbox-material.rasi # Gruvbox side-panel theme
+├── dunst/
+│   └── dunstrc
+├── gtk-3.0/
+│   └── settings.ini
+├── gtk-4.0/
+│   └── settings.ini
+├── Xresources                # copied to ~/.Xresources
+└── bashrc                    # copied to ~/.bashrc
 ```
 
 To update the repo after making changes to live configs, copy them back:
@@ -232,16 +259,23 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 - [ ] Wallpapers
 - [ ] Add option for alternative display manager (Ly, etc.)
 
+### Fun Packages (manual install)
+
+These aren't in `setup.sh` but are worth having:
+
+- `asciiquarium` — animated aquarium in your terminal
+- `cbonsai` — growing ASCII bonsai tree (`cbonsai -l` for live mode)
+- `cmatrix` — the Matrix rain effect
+- `lolcat` — rainbow-colored terminal output (`ls | lolcat`)
+- `figlet` / `toilet` — big ASCII text banners
+
+Install any of them with:
+```bash
+yay -S asciiquarium cbonsai-git
+sudo pacman -S cmatrix lolcat figlet
+```
+
 ### Potential Packages to Add
-
-**System/Desktop:**
-- [x] `dunst` - notification daemon
-- [x] `lxsession` - polkit agent for GUI privilege prompts (Thunar mounting, etc.)
-- [x] `xdg-user-dirs` - auto-creates standard dirs (~/Pictures, ~/Downloads, etc.)
-
-**Thunar support:**
-- [ ] `gvfs` - trash, drive mounting, network shares
-- [ ] `tumbler` - thumbnail previews
 
 **Media/keybindings:**
 - [ ] `pamixer` - CLI volume control
@@ -249,6 +283,4 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 - [ ] `playerctl` - media player controls (play/pause/next)
 
 **Utilities:**
-- [ ] `unzip` - archive extraction
-- [ ] `man-db` - man pages
 - [ ] `redshift` - blue light filter
