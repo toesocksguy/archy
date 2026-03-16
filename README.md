@@ -11,7 +11,7 @@ An idempotent setup script for a dwm-based Arch Linux desktop environment.
 - Compiles and installs slstatus from suckless.org
 - Configures LightDM with slick-greeter
 - Sets up dwm desktop session (autostart.sh)
-- Deploys config files (bashrc, emacs, ghostty, picom, rofi, dwm, slstatus, Xresources)
+- Deploys config files (bashrc, emacs, kitty, picom, rofi, dwm, slstatus, Xresources)
 - Installs phinger-cursors cursor theme
 - Creates wallpaper directory
 - Enables system services (NetworkManager, LightDM, pipewire)
@@ -35,7 +35,7 @@ chmod +x setup.sh
 - libx11, libxft, libxinerama, fontconfig, freetype2
 
 ### Applications
-- emacs, ghostty, picom, rofi, thunar, firefox
+- emacs, kitty, picom, rofi, thunar, firefox
 
 ### Display Manager
 - lightdm, lightdm-slick-greeter
@@ -139,6 +139,21 @@ rules = (
 
 **Solution:** The script now runs `make clean` as the user and only `sudo make install`. If you hit this on an existing install, either `sudo chown -R $USER ~/.config/dwm ~/.config/slstatus` or start from a fresh install.
 
+### Ghostty Crashes on Launch (Switched to Kitty)
+
+**Problem:** Ghostty 1.3.0-arch2 launches (shell integration injects) but immediately exits with no window. Final log line: `warning(gtk_ghostty_application): unimplemented action=.cell_size`.
+
+**Investigated:**
+- Reverting theme/font config — no effect
+- Removing GTK4 CSS symlinks — no effect
+- Killing picom — no effect
+- Moving ghostty config out of the way — no effect
+- Kitty launched without issues in the same environment
+
+**Likely cause:** Ghostty 1.3.0 regression in VM environments lacking full DRI3 support (`libEGL warning: DRI3 error: Could not get DRI3 device`), or a GTK 4.20 compatibility issue.
+
+**Resolution:** Switched primary terminal to Kitty. Ghostty removed from packages. Kitty configured with Gruvbox Material Dark Medium theme and JetBrainsMono Nerd Font Mono.
+
 ### QEMU/KVM Video Driver
 
 **Note:** For VMs using QEMU/KVM, you may need to install `xf86-video-qxl` for proper display.
@@ -195,8 +210,9 @@ config/
 │   └── config.h          # copied into cloned slstatus source before compiling
 ├── emacs/
 │   └── init.el
-├── ghostty/
-│   └── config
+├── kitty/
+│   ├── kitty.conf
+│   └── current-theme.conf    # Gruvbox Material Dark Medium
 ├── picom/
 │   └── picom.conf
 ├── rofi/

@@ -43,7 +43,7 @@ PACKAGES=(
 
     # Apps
     emacs
-    ghostty
+    kitty
     picom
     rofi
     thunar
@@ -455,10 +455,11 @@ deploy_configs() {
     # Config files to copy: source (in repo) -> destination
     local -A configs=(
         ["$CONFIG_DIR/emacs/init.el"]="$HOME/.config/emacs/init.el"
-        ["$CONFIG_DIR/ghostty/config"]="$HOME/.config/ghostty/config"
-        ["$CONFIG_DIR/picom/picom.conf"]="$HOME/.config/picom/picom.conf"
+["$CONFIG_DIR/picom/picom.conf"]="$HOME/.config/picom/picom.conf"
         ["$CONFIG_DIR/rofi/config.rasi"]="$HOME/.config/rofi/config.rasi"
         ["$CONFIG_DIR/rofi/gruvbox-material.rasi"]="$HOME/.config/rofi/gruvbox-material.rasi"
+        ["$CONFIG_DIR/kitty/kitty.conf"]="$HOME/.config/kitty/kitty.conf"
+        ["$CONFIG_DIR/kitty/current-theme.conf"]="$HOME/.config/kitty/current-theme.conf"
         ["$CONFIG_DIR/bashrc"]="$HOME/.bashrc"
         ["$CONFIG_DIR/dunst/dunstrc"]="$HOME/.config/dunst/dunstrc"
         ["$CONFIG_DIR/gtk-3.0/settings.ini"]="$HOME/.config/gtk-3.0/settings.ini"
