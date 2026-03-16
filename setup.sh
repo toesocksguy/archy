@@ -71,6 +71,9 @@ PACKAGES=(
     # Polkit agent
     lxsession
 
+    # XDG user directories
+    xdg-user-dirs
+
     # Fonts
     ttf-jetbrains-mono-nerd
 
@@ -429,6 +432,16 @@ setup_xresources() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# XDG User Directories
+# ─────────────────────────────────────────────────────────────────────────────
+
+setup_xdg_dirs() {
+    log_info "Setting up XDG user directories..."
+    xdg-user-dirs-update
+    log_ok "XDG user directories created"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Wallpapers
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -498,6 +511,7 @@ main() {
     install_dwm
     install_slstatus
     setup_dwm_session
+    setup_xdg_dirs
     deploy_configs
     install_cursor_theme
     setup_xresources

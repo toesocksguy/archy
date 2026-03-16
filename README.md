@@ -237,7 +237,7 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 **System/Desktop:**
 - [x] `dunst` - notification daemon
 - [x] `lxsession` - polkit agent for GUI privilege prompts (Thunar mounting, etc.)
-- [ ] `xdg-user-dirs` - auto-creates standard dirs (~/Pictures, ~/Downloads, etc.)
+- [x] `xdg-user-dirs` - auto-creates standard dirs (~/Pictures, ~/Downloads, etc.)
 
 **Thunar support:**
 - [ ] `gvfs` - trash, drive mounting, network shares
