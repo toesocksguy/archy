@@ -390,7 +390,7 @@ slstatus &
 dunst &
 lxsession &
 picom -b &
-feh --randomize --bg-fill ~/Pictures/backgrounds/* &
+feh --randomize --bg-fill ~/Pictures/wallpapers/* &
 nm-applet --indicator &
 exec dwm
 EOF
@@ -512,16 +512,12 @@ setup_xdg_dirs() {
 # ─────────────────────────────────────────────────────────────────────────────
 
 setup_wallpapers() {
-    local wall_dir="$HOME/Pictures/backgrounds"
+    local wall_dir="$HOME/Pictures/wallpapers"
 
-    if [[ -d "$wall_dir" ]]; then
-        log_ok "Wallpaper directory exists"
-        return
-    fi
-
-    log_info "Creating wallpaper directory..."
+    log_info "Deploying wallpapers..."
     mkdir -p "$wall_dir"
-    log_ok "Created $wall_dir"
+    cp "$SCRIPT_DIR/wallpapers/"* "$wall_dir/"
+    log_ok "Wallpapers deployed to $wall_dir"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

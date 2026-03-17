@@ -201,7 +201,7 @@ menu {
 | `~/.bashrc` | Shell configuration |
 | `~/.Xresources` | X cursor theme config |
 | `~/.local/share/icons/phinger-cursors-light/` | Cursor theme files |
-| `~/Pictures/backgrounds/` | Wallpapers for feh |
+| `~/Pictures/wallpapers/` | Wallpapers for feh |
 | `/etc/lightdm/lightdm.conf` | LightDM configuration |
 
 ## Status Bar (slstatus)
