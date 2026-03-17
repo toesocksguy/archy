@@ -6,7 +6,7 @@
 rofi -dmenu -i -p "Keybindings" -no-custom << 'EOF'
 Super+p             Rofi launcher
 Super+Shift+p       dmenu
-Super+Shift+Return  Terminal (ghostty)
+Super+Shift+Return  Terminal
 Super+Shift+w       Random wallpaper
 Super+Shift+c       Close window
 Super+Shift+q       Quit dwm
