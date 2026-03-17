@@ -1,0 +1,4 @@
+/* Override Gruvbox theme: remove rounded corners on context menus to avoid void corner artifacts */
+menu {
+    border-radius: 0;
+}
