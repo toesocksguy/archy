@@ -44,7 +44,7 @@ chmod +x setup.sh
 - lightdm, lightdm-slick-greeter
 
 ### Thunar Support
-- gvfs, tumbler, thunar-archive-plugin, thunar-volman
+- gvfs, tumbler, thunar-archive-plugin, thunar-volman, xarchiver
 
 ### Utilities
 - fzf, ripgrep, feh, mise, xclip, maim, slop, dmenu, unzip, zip, man-db, wget, which, tree, htop, xdotool, fastfetch, bat, eza, zoxide, fd, bash-completion, yt-dlp
@@ -244,6 +244,8 @@ config/
 │   └── settings.ini
 ├── gtk-4.0/
 │   └── settings.ini
+├── xarchiver/
+│   └── xarchiverrc           # default format: tar.gz
 ├── Xresources                # copied to ~/.Xresources
 └── bashrc                    # copied to ~/.bashrc
 ```
