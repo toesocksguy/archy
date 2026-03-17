@@ -68,7 +68,8 @@ chmod +x setup.sh
 - reflector, timeshift, ntfs-3g, xdg-user-dirs
 
 ### AUR
-- gruvbox-plus-icon-theme
+- gruvbox-plus-icon-theme — Gruvbox icon theme
+- libation — audiobook manager (Audible library); may pull in .NET runtime deps
 
 ## Troubleshooting Notes
 
@@ -172,6 +173,19 @@ rules = (
 
 **Resolution:** Switched primary terminal to Kitty. Ghostty removed from packages. Kitty configured with Gruvbox Material Dark Medium theme and JetBrainsMono Nerd Font Mono.
 
+### Thunar Context Menu Rounded Corner Voids
+
+**Problem:** Right-click context menu in Thunar shows dark void artifacts in the corners.
+
+**Cause:** The Gruvbox GTK theme applies `border-radius` via CSS to context menus. The transparent corner pixels render against whatever is behind the window, creating visible voids.
+
+**Solution:** `~/.config/gtk-3.0/gtk.css` overrides the theme to remove border-radius on menus:
+```css
+menu {
+    border-radius: 0;
+}
+```
+
 ### QEMU/KVM Video Driver
 
 **Note:** For VMs using QEMU/KVM, you may need to install `xf86-video-qxl` for proper display.
@@ -241,7 +255,8 @@ config/
 ├── dunst/
 │   └── dunstrc
 ├── gtk-3.0/
-│   └── settings.ini
+│   ├── settings.ini
+│   └── gtk.css               # overrides: removes rounded corners on context menus
 ├── gtk-4.0/
 │   └── settings.ini
 ├── xarchiver/

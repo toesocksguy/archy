@@ -208,6 +208,7 @@ install_yay() {
 
 AUR_PACKAGES=(
     gruvbox-plus-icon-theme
+    libation
 )
 
 install_aur_packages() {
