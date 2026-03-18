@@ -379,12 +379,11 @@ Type=XSession
 EOF
     fi
 
-    # Create autostart.sh
+    # Always write autostart.sh so re-runs stay in sync with setup.sh
     local autostart="$HOME/.config/dwm/autostart.sh"
-    if [[ ! -f "$autostart" ]]; then
-        log_info "Creating autostart.sh..."
-        mkdir -p "$HOME/.config/dwm"
-        cat > "$autostart" << 'EOF'
+    log_info "Writing autostart.sh..."
+    mkdir -p "$HOME/.config/dwm"
+    cat > "$autostart" << 'EOF'
 #!/bin/sh
 slstatus &
 dunst &
@@ -394,8 +393,7 @@ feh --randomize --bg-fill ~/Pictures/wallpapers/* &
 nm-applet --indicator &
 exec dwm
 EOF
-        chmod +x "$autostart"
-    fi
+    chmod +x "$autostart"
 
     log_ok "dwm session configured"
 }
