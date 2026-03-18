@@ -470,14 +470,46 @@ install_cursor_theme() {
     local icon_dir="$HOME/.local/share/icons"
 
     if [[ -d "$icon_dir/phinger-cursors-light" ]]; then
-        log_ok "Cursor theme already installed"
-        return
+        log_ok "Cursor theme already installed (user)"
+    else
+        log_info "Installing phinger-cursors..."
+        mkdir -p "$icon_dir"
+        curl -fsSL https://github.com/phisch/phinger-cursors/releases/latest/download/phinger-cursors-variants.tar.bz2 | tar xfj - -C "$icon_dir"
+        log_ok "Cursor theme installed"
     fi
 
-    log_info "Installing phinger-cursors..."
-    mkdir -p "$icon_dir"
-    curl -fsSL https://github.com/phisch/phinger-cursors/releases/latest/download/phinger-cursors-variants.tar.bz2 | tar xfj - -C "$icon_dir"
-    log_ok "Cursor theme installed"
+    # Also copy to system icons so LightDM/slick-greeter can use it
+    if [[ ! -d /usr/share/icons/phinger-cursors-light ]]; then
+        log_info "Copying cursor theme to system icons for LightDM..."
+        sudo cp -r "$icon_dir/phinger-cursors-light" /usr/share/icons/
+        log_ok "Cursor theme copied to /usr/share/icons/"
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Slick Greeter
+# ─────────────────────────────────────────────────────────────────────────────
+
+configure_slick_greeter() {
+    log_info "Configuring slick-greeter..."
+
+    # Copy background wallpaper to system-accessible path
+    local bg_src="$SCRIPT_DIR/wallpapers/macos-sequoia.jpg"
+    if [[ -f "$bg_src" ]]; then
+        sudo mkdir -p /usr/share/backgrounds
+        sudo cp "$bg_src" /usr/share/backgrounds/macos-sequoia.jpg
+        log_info "Copied background to /usr/share/backgrounds/"
+    else
+        log_info "macos-sequoia.jpg not found in wallpapers/, skipping background"
+    fi
+
+    # Deploy slick-greeter config
+    if [[ -f "$CONFIG_DIR/lightdm/slick-greeter.conf" ]]; then
+        sudo cp "$CONFIG_DIR/lightdm/slick-greeter.conf" /etc/lightdm/slick-greeter.conf
+        log_info "Deployed slick-greeter.conf"
+    fi
+
+    log_ok "slick-greeter configured"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -579,6 +611,7 @@ main() {
     setup_xresources
     setup_wallpapers
     configure_lightdm
+    configure_slick_greeter
     enable_services
     log_ok "Setup complete!"
 }
