@@ -195,9 +195,7 @@ install_yay() {
     local tmp_dir
     tmp_dir=$(mktemp -d)
     git clone https://aur.archlinux.org/yay.git "$tmp_dir/yay"
-    cd "$tmp_dir/yay"
-    makepkg -si --noconfirm
-    cd - >/dev/null
+    (cd "$tmp_dir/yay" && makepkg -si --noconfirm)
     rm -rf "$tmp_dir"
     log_ok "yay installed"
 }
@@ -236,9 +234,7 @@ install_gruvbox_gtk_theme() {
 
     # Install dark medium variant with orange accent
     # -l flag automatically symlinks GTK4 CSS into ~/.config/gtk-4.0/
-    cd "$tmp_dir/Gruvbox-GTK-Theme/themes"
-    ./install.sh --tweaks medium -c dark -t orange -l
-    cd - >/dev/null
+    (cd "$tmp_dir/Gruvbox-GTK-Theme/themes" && ./install.sh --tweaks medium -c dark -t orange -l)
 
     rm -rf "$tmp_dir"
     log_ok "Gruvbox GTK theme installed"
@@ -271,25 +267,26 @@ install_dwm() {
             "https://dwm.suckless.org/patches/swallow/dwm-swallow-6.3.diff"
         )
 
-        cd "$dwm_dir"
-        for url in "${patches[@]}"; do
-            local name
-            name=$(basename "$url")
-            local patch_file
-            patch_file=$(mktemp)
+        (
+            cd "$dwm_dir"
+            for url in "${patches[@]}"; do
+                local name
+                name=$(basename "$url")
+                local patch_file
+                patch_file=$(mktemp)
 
-            log_info "Downloading $name..."
-            curl -fsSL "$url" -o "$patch_file"
+                log_info "Downloading $name..."
+                curl -fsSL "$url" -o "$patch_file"
 
-            if git apply --check "$patch_file" 2>/dev/null; then
-                log_info "Applying $name..."
-                git apply "$patch_file"
-            else
-                log_info "$name has conflicts, skipping"
-            fi
-            rm -f "$patch_file"
-        done
-        cd - >/dev/null
+                if git apply --check "$patch_file" 2>/dev/null; then
+                    log_info "Applying $name..."
+                    git apply "$patch_file"
+                else
+                    log_info "$name has conflicts, skipping"
+                fi
+                rm -f "$patch_file"
+            done
+        )
 
         touch "$dwm_dir/.patched"
     fi
@@ -311,10 +308,7 @@ install_dwm() {
     # Compile and install
     # Only use sudo for install, not compile, to avoid root-owned files
     log_info "Compiling dwm..."
-    cd "$dwm_dir"
-    make clean
-    sudo make install
-    cd - >/dev/null
+    (cd "$dwm_dir" && make clean && sudo make install)
 
     log_ok "dwm installed"
 }
@@ -344,10 +338,7 @@ install_slstatus() {
     # Compile and install
     # Only use sudo for install, not compile, to avoid root-owned files
     log_info "Compiling slstatus..."
-    cd "$slstatus_dir"
-    make clean
-    sudo make install
-    cd - >/dev/null
+    (cd "$slstatus_dir" && make clean && sudo make install)
 
     log_ok "slstatus installed"
 }

@@ -275,6 +275,8 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 - [ ] Screenshot keybinding in dwm config.h
 - [ ] Wallpapers
 - [ ] Add option for alternative display manager (Ly, etc.)
+- [ ] Screen locker — options: `slock` (suckless, fits the stack), `i3lock` (popular, supports background image), `i3lock-color` (AUR, full customization). Bind to `Super+Shift+l` in `config.h`.
+- [ ] Add Starship and gruvbox theme https://starship.rs/presets/gruvbox-rainbow
 
 ### Fun Packages (manual install)
 
