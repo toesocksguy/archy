@@ -11,10 +11,12 @@ CONFIG_DIR="$SCRIPT_DIR/config"
 # Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
+RED='\033[0;31m'
 NC='\033[0m'
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-log_ok() { echo -e "${GREEN}[OK]${NC} $1"; }
+log_ok()   { echo -e "${GREEN}[OK]${NC} $1"; }
+log_err()  { echo -e "${RED}[ERR]${NC} $1" >&2; }
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Packages
