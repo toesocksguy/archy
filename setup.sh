@@ -194,9 +194,9 @@ install_yay() {
     log_info "Installing yay..."
     local tmp_dir
     tmp_dir=$(mktemp -d)
+    trap 'rm -rf "$tmp_dir"' RETURN
     git clone https://aur.archlinux.org/yay.git "$tmp_dir/yay"
     (cd "$tmp_dir/yay" && makepkg -si --noconfirm)
-    rm -rf "$tmp_dir"
     log_ok "yay installed"
 }
 
@@ -230,13 +230,13 @@ install_gruvbox_gtk_theme() {
     log_info "Installing Gruvbox GTK theme..."
     local tmp_dir
     tmp_dir=$(mktemp -d)
+    trap 'rm -rf "$tmp_dir"' RETURN
     git clone https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme "$tmp_dir/Gruvbox-GTK-Theme"
 
     # Install dark medium variant with orange accent
     # -l flag automatically symlinks GTK4 CSS into ~/.config/gtk-4.0/
     (cd "$tmp_dir/Gruvbox-GTK-Theme/themes" && ./install.sh --tweaks medium -c dark -t orange -l)
 
-    rm -rf "$tmp_dir"
     log_ok "Gruvbox GTK theme installed"
 }
 
