@@ -276,7 +276,11 @@ install_dwm() {
                 patch_file=$(mktemp)
 
                 log_info "Downloading $name..."
-                curl -fsSL "$url" -o "$patch_file"
+                if ! curl -fsSL "$url" -o "$patch_file"; then
+                    log_info "Failed to download $name, skipping"
+                    rm -f "$patch_file"
+                    continue
+                fi
 
                 if git apply --check "$patch_file" 2>/dev/null; then
                     log_info "Applying $name..."
