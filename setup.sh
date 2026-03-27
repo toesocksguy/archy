@@ -404,6 +404,11 @@ configure_lightdm() {
 
     local conf="/etc/lightdm/lightdm.conf"
 
+    if ! grep -q "^\[Seat:\*\]" "$conf" 2>/dev/null; then
+        log_err "[Seat:*] section not found in $conf — LightDM not configured"
+        return 1
+    fi
+
     # Set slick-greeter as the greeter
     if ! grep -q "^greeter-session=lightdm-slick-greeter" "$conf" 2>/dev/null; then
         sudo sed -i '/^\[Seat:\*\]/a greeter-session=lightdm-slick-greeter' "$conf"
