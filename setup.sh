@@ -329,6 +329,9 @@ install_dwm() {
                     continue
                 fi
 
+                # --check before --apply: a failed check means the patch has conflicts
+                # against already-patched source. Non-fatal — log and skip rather than abort,
+                # since partial patching is better than no dwm.
                 if git apply --check "$patch_file" 2>/dev/null; then
                     log_info "Applying $name..."
                     git apply "$patch_file"
