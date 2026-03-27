@@ -2,6 +2,27 @@
 #
 # Arch Linux Environment Setup Script
 #
+# Sets up a DWM-based desktop environment with Gruvbox Material Dark theming
+# on a fresh Arch Linux install.
+#
+# PRECONDITIONS:
+#   - Run as a regular user with sudo access (not root)
+#   - pacman and base system available
+#   - Network connection active
+#
+# IDEMPOTENCY:
+#   - Safe to re-run. Most steps are guarded by existence checks.
+#   - autostart.sh is always overwritten to stay in sync with this script.
+#   - Wallpapers and config files are always redeployed on re-run.
+#
+# ORDERING:
+#   - Packages must be installed before anything that depends on them.
+#   - yay must be installed before AUR packages.
+#   - install_cursor_theme must run before configure_slick_greeter so the
+#     cursor is in /usr/share/icons/ when LightDM reads its config.
+#   - configure_lightdm must run before enable_services so LightDM starts
+#     with the correct greeter and session already configured.
+#
 
 set -euo pipefail
 
