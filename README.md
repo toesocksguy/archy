@@ -273,9 +273,10 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 ## TODO
 
 - [ ] Screenshot keybinding in dwm config.h
-- [ ] Wallpapers
+- [x] Wallpapers
 - [ ] Add option for alternative display manager (Ly, etc.)
 - [ ] Screen locker — options: `slock` (suckless, fits the stack), `i3lock` (popular, supports background image), `i3lock-color` (AUR, full customization). Bind to `Super+Shift+l` in `config.h`.
+- [ ] slstatus wired-only support — on machines with no wireless interface, `wifi_essid` shows `n/a`. Either remove the wifi component when no wireless is detected, or replace it with an ethernet status component.
 - [ ] Add Starship and gruvbox theme https://starship.rs/presets/gruvbox-rainbow
 
 ### Fun Packages (manual install)

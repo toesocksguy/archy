@@ -124,6 +124,7 @@ PACKAGES=(
     # Network
     networkmanager
     network-manager-applet
+    iw
 
     # Bluetooth
     bluez
@@ -339,6 +340,13 @@ install_slstatus() {
     if [[ -f "$CONFIG_DIR/slstatus/config.h" ]]; then
         cp "$CONFIG_DIR/slstatus/config.h" "$slstatus_dir/config.h"
         log_info "Applied custom slstatus config.h"
+    fi
+
+    # Inject the host's actual wireless interface name before compiling
+    local iface
+    iface=$(iw dev | awk '/Interface/{print $2; exit}')
+    if [[ -n "$iface" ]]; then
+        sed -i "s/wlan0/$iface/" "$slstatus_dir/config.h"
     fi
 
     # Compile and install
