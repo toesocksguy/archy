@@ -477,9 +477,13 @@ install_cursor_theme() {
 
     # Also copy to system icons so LightDM/slick-greeter can use it
     if [[ ! -d /usr/share/icons/phinger-cursors-light ]]; then
-        log_info "Copying cursor theme to system icons for LightDM..."
-        sudo cp -r "$icon_dir/phinger-cursors-light" /usr/share/icons/
-        log_ok "Cursor theme copied to /usr/share/icons/"
+        if [[ ! -d "$icon_dir/phinger-cursors-light" ]]; then
+            log_err "phinger-cursors-light not found in $icon_dir, skipping system copy"
+        else
+            log_info "Copying cursor theme to system icons for LightDM..."
+            sudo cp -r "$icon_dir/phinger-cursors-light" /usr/share/icons/
+            log_ok "Cursor theme copied to /usr/share/icons/"
+        fi
     fi
 }
 
