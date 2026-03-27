@@ -286,45 +286,39 @@ install_gruvbox_gtk_theme() {
 # Suckless
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Clones dwm from suckless.org, applies patches, copies our config.h, and compiles.
-# Patches are only applied once — .patched sentinel file prevents re-patching on
+# Shared setup for suckless tools: clone, patch, copy config.h.
+# Usage: install_suckless_tool <name> <repo_url> [patch_url...]
+# Callers are responsible for any pre-compile steps and the compile itself.
+# Patches are only applied once — .patched sentinel prevents re-patching on
 # re-runs, which would cause conflicts against already-patched source.
-# Compile runs as user; only install uses sudo to avoid root-owned source files.
-# Subshells used for all cd operations so failures don't strand the parent shell.
-install_dwm() {
-    local dwm_dir="$HOME/.config/dwm"
+install_suckless_tool() {
+    local name=$1
+    local url=$2
+    shift 2
+    local patches=("$@")
+    local tool_dir="$HOME/.config/$name"
 
-    log_info "Setting up dwm..."
-
-    # Create directory if it doesn't exist
-    if [[ ! -d "$dwm_dir" ]]; then
-        mkdir -p "$dwm_dir"
-    fi
+    log_info "Setting up $name..."
+    mkdir -p "$tool_dir"
 
     # Clone if directory is empty
-    if [[ -z "$(ls -A "$dwm_dir" 2>/dev/null)" ]]; then
-        log_info "Cloning dwm..."
-        git clone https://git.suckless.org/dwm "$dwm_dir"
+    if [[ -z "$(ls -A "$tool_dir" 2>/dev/null)" ]]; then
+        log_info "Cloning $name..."
+        git clone "$url" "$tool_dir"
     fi
 
-    # Apply patches (only on fresh clone, before config.h is copied)
-    if [[ ! -f "$dwm_dir/.patched" ]]; then
-        local patches=(
-            "https://dwm.suckless.org/patches/pertag/dwm-pertag-20200914-61bb8b2.diff"
-            "https://dwm.suckless.org/patches/swallow/dwm-swallow-6.3.diff"
-        )
-
+    # Apply patches only on fresh clone — sentinel prevents re-patching
+    if [[ ${#patches[@]} -gt 0 && ! -f "$tool_dir/.patched" ]]; then
         (
-            cd "$dwm_dir"
-            for url in "${patches[@]}"; do
-                local name
-                name=$(basename "$url")
-                local patch_file
+            cd "$tool_dir"
+            for patch_url in "${patches[@]}"; do
+                local patch_name patch_file
+                patch_name=$(basename "$patch_url")
                 patch_file=$(mktemp)
 
-                log_info "Downloading $name..."
-                if ! curl -fsSL "$url" -o "$patch_file"; then
-                    log_info "Failed to download $name, skipping"
+                log_info "Downloading $patch_name..."
+                if ! curl -fsSL "$patch_url" -o "$patch_file"; then
+                    log_info "Failed to download $patch_name, skipping"
                     rm -f "$patch_file"
                     continue
                 fi
@@ -333,78 +327,59 @@ install_dwm() {
                 # against already-patched source. Non-fatal — log and skip rather than abort,
                 # since partial patching is better than no dwm.
                 if git apply --check "$patch_file" 2>/dev/null; then
-                    log_info "Applying $name..."
+                    log_info "Applying $patch_name..."
                     git apply "$patch_file"
                 else
-                    log_info "$name has conflicts, skipping"
+                    log_info "$patch_name has conflicts, skipping"
                 fi
                 rm -f "$patch_file"
             done
         )
-
-        touch "$dwm_dir/.patched"
+        touch "$tool_dir/.patched"
     fi
 
     # Copy custom config.h if available in repo
-    if [[ -f "$CONFIG_DIR/dwm/config.h" ]]; then
-        cp "$CONFIG_DIR/dwm/config.h" "$dwm_dir/config.h"
-        log_info "Applied custom dwm config.h"
+    if [[ -f "$CONFIG_DIR/$name/config.h" ]]; then
+        cp "$CONFIG_DIR/$name/config.h" "$tool_dir/config.h"
+        log_info "Applied custom $name config.h"
     fi
+}
 
-    # Copy scripts if available
+# Installs dwm. Applies pertag and swallow patches, deploys scripts, and compiles.
+install_dwm() {
+    install_suckless_tool "dwm" "https://git.suckless.org/dwm" \
+        "https://dwm.suckless.org/patches/pertag/dwm-pertag-20200914-61bb8b2.diff" \
+        "https://dwm.suckless.org/patches/swallow/dwm-swallow-6.3.diff"
+
+    # Copy scripts (dwm-specific — slstatus has no scripts dir)
     if [[ -d "$CONFIG_DIR/dwm/scripts" ]]; then
-        mkdir -p "$dwm_dir/scripts"
-        cp "$CONFIG_DIR/dwm/scripts/"* "$dwm_dir/scripts/"
-        chmod +x "$dwm_dir/scripts/"*
+        mkdir -p "$HOME/.config/dwm/scripts"
+        cp "$CONFIG_DIR/dwm/scripts/"* "$HOME/.config/dwm/scripts/"
+        chmod +x "$HOME/.config/dwm/scripts/"*
         log_info "Deployed dwm scripts"
     fi
 
-    # Compile and install
-    # Only use sudo for install, not compile, to avoid root-owned files
+    # Compile and install — user compiles, sudo only for install to avoid root-owned files
     log_info "Compiling dwm..."
-    (cd "$dwm_dir" && make clean && sudo make install)
-
+    (cd "$HOME/.config/dwm" && make clean && sudo make install)
     log_ok "dwm installed"
 }
 
-# Clones slstatus, copies our config.h, injects the host's wireless interface name,
-# and compiles. Interface name is detected at setup time via iw — baked into the
-# binary since slstatus is a compiled C program, not a script.
-# Compile runs as user; only install uses sudo to avoid root-owned source files.
+# Installs slstatus. Injects the host's wireless interface name before compiling.
 install_slstatus() {
-    local slstatus_dir="$HOME/.config/slstatus"
+    install_suckless_tool "slstatus" "https://git.suckless.org/slstatus"
 
-    log_info "Setting up slstatus..."
-
-    # Create directory if it doesn't exist
-    if [[ ! -d "$slstatus_dir" ]]; then
-        mkdir -p "$slstatus_dir"
-    fi
-
-    # Clone if directory is empty
-    if [[ -z "$(ls -A "$slstatus_dir" 2>/dev/null)" ]]; then
-        log_info "Cloning slstatus..."
-        git clone https://git.suckless.org/slstatus "$slstatus_dir"
-    fi
-
-    # Copy custom config.h if available in repo
-    if [[ -f "$CONFIG_DIR/slstatus/config.h" ]]; then
-        cp "$CONFIG_DIR/slstatus/config.h" "$slstatus_dir/config.h"
-        log_info "Applied custom slstatus config.h"
-    fi
-
-    # Inject the host's actual wireless interface name before compiling
+    # Inject the host's actual wireless interface name before compiling —
+    # baked into the binary since slstatus is compiled C, not a script.
     local iface
     iface=$(iw dev | awk '/Interface/{print $2; exit}')
     if [[ -n "$iface" ]]; then
-        sed -i "s/wlan0/$iface/" "$slstatus_dir/config.h"
+        sed -i "s/wlan0/$iface/" "$HOME/.config/slstatus/config.h"
     fi
 
-    # Compile and install
-    # Only use sudo for install, not compile, to avoid root-owned files
+    # Compile and install — user compiles, sudo only for install to avoid root-owned files
     log_info "Compiling slstatus..."
-    (cd "$slstatus_dir" && make clean && sudo make install)
-
+    (cd "$HOME/.config/slstatus" && make clean && sudo make install)
     log_ok "slstatus installed"
 }
 
