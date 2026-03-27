@@ -173,6 +173,9 @@ CONFLICTING_PACKAGES=(
 
 # Remove conflicting packages before installing new ones
 # This prevents pacman from failing due to package conflicts
+# Removes packages that conflict with our desired stack before installation.
+# Checks each package individually to avoid pacman failing on missing packages.
+# Pulseaudio must be removed before pipewire-pulse — they own the same socket.
 remove_conflicting() {
     log_info "Checking for conflicting packages..."
     local to_remove=()
@@ -192,12 +195,17 @@ remove_conflicting() {
     fi
 }
 
+# Full system upgrade before installing packages to avoid partial upgrade issues.
+# Arch does not support partial upgrades — skipping this risks broken dependencies.
 update_system() {
     log_info "Updating system..."
     sudo pacman -Syu --noconfirm
     log_ok "System updated"
 }
 
+# Installs all packages in PACKAGES. Calls remove_conflicting first to clear
+# anything that would cause a conflict. --needed skips already-installed packages,
+# making this safe to re-run.
 install_packages() {
     log_info "Installing packages..."
     remove_conflicting
@@ -209,6 +217,9 @@ install_packages() {
 # AUR Helper
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Installs yay AUR helper from source. Skips if already installed.
+# Uses a subshell for the cd so a build failure doesn't strand the parent shell.
+# trap ensures the tmp dir is cleaned up even if makepkg fails.
 install_yay() {
     if command -v yay &>/dev/null; then
         log_ok "yay already installed"
@@ -233,6 +244,8 @@ AUR_PACKAGES=(
     libation
 )
 
+# Installs AUR packages via yay. Skips already-installed packages with --needed.
+# Requires yay to be installed first.
 install_aur_packages() {
     log_info "Installing AUR packages..."
     yay -S --needed --noconfirm "${AUR_PACKAGES[@]}"
@@ -243,6 +256,11 @@ install_aur_packages() {
 # Gruvbox GTK Theme
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Clones and installs the Gruvbox GTK theme from source. Skips if already installed.
+# --tweaks medium -c dark -t orange -l installs the dark/orange/medium variant and
+# symlinks GTK4 CSS into ~/.config/gtk-4.0/. sassc must be installed or the GTK3
+# theme is silently skipped by the upstream install script.
+# trap ensures tmp dir is cleaned up even if the install script fails.
 install_gruvbox_gtk_theme() {
     local theme_dir="$HOME/.themes/Gruvbox-Orange-Dark-Medium"
 
@@ -268,6 +286,11 @@ install_gruvbox_gtk_theme() {
 # Suckless
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Clones dwm from suckless.org, applies patches, copies our config.h, and compiles.
+# Patches are only applied once — .patched sentinel file prevents re-patching on
+# re-runs, which would cause conflicts against already-patched source.
+# Compile runs as user; only install uses sudo to avoid root-owned source files.
+# Subshells used for all cd operations so failures don't strand the parent shell.
 install_dwm() {
     local dwm_dir="$HOME/.config/dwm"
 
@@ -341,6 +364,10 @@ install_dwm() {
     log_ok "dwm installed"
 }
 
+# Clones slstatus, copies our config.h, injects the host's wireless interface name,
+# and compiles. Interface name is detected at setup time via iw — baked into the
+# binary since slstatus is a compiled C program, not a script.
+# Compile runs as user; only install uses sudo to avoid root-owned source files.
 install_slstatus() {
     local slstatus_dir="$HOME/.config/slstatus"
 
@@ -382,6 +409,11 @@ install_slstatus() {
 # Desktop Session
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Creates the dwm.desktop session file for LightDM and writes autostart.sh.
+# dwm.desktop is only written once — it references $HOME which doesn't change.
+# autostart.sh is always overwritten so re-runs stay in sync with this script.
+# Uses $HOME instead of ~ in the .desktop Exec field — .desktop files do not
+# expand tilde.
 setup_dwm_session() {
     log_info "Setting up dwm session..."
 
@@ -428,6 +460,10 @@ EOF
 # Services
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Configures LightDM to use slick-greeter and dwm as the default session.
+# Edits /etc/lightdm/lightdm.conf in place with sed. Guards against a missing
+# [Seat:*] section, which is commented out by default on a fresh Arch install —
+# sed would silently no-op without the guard.
 configure_lightdm() {
     log_info "Configuring LightDM..."
 
@@ -453,6 +489,10 @@ configure_lightdm() {
     log_ok "LightDM configured"
 }
 
+# Enables system and user services. Each service is guarded by is-enabled so
+# re-runs don't re-enable already-enabled services.
+# Pipewire is a user service — enabled without sudo via systemctl --user.
+# Docker group membership requires logout to take effect.
 enable_services() {
     log_info "Enabling services..."
 
@@ -497,6 +537,11 @@ enable_services() {
 # Cursor Theme
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Downloads and installs phinger-cursors-light to two locations:
+#   ~/.local/share/icons/  — for GTK/X11 apps during the user session
+#   /usr/share/icons/      — for LightDM/slick-greeter at the login screen
+# The system copy is guarded against a missing user install in case the
+# download failed earlier in the same run.
 install_cursor_theme() {
     local icon_dir="$HOME/.local/share/icons"
 
@@ -525,6 +570,9 @@ install_cursor_theme() {
 # Slick Greeter
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Copies the LightDM background to /usr/share/backgrounds/ and deploys
+# slick-greeter.conf to /etc/lightdm/. Both paths must be system-accessible —
+# LightDM runs as its own user and cannot read from $HOME.
 configure_slick_greeter() {
     log_info "Configuring slick-greeter..."
 
@@ -551,6 +599,7 @@ configure_slick_greeter() {
 # Xresources
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Deploys .Xresources to $HOME. Skips silently if not present in the repo.
 setup_xresources() {
     log_info "Setting up Xresources..."
 
@@ -566,6 +615,8 @@ setup_xresources() {
 # XDG User Directories
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Creates standard XDG user directories (~/Documents, ~/Downloads, etc.).
+# Safe to re-run — xdg-user-dirs-update is idempotent.
 setup_xdg_dirs() {
     log_info "Setting up XDG user directories..."
     xdg-user-dirs-update
@@ -576,6 +627,8 @@ setup_xdg_dirs() {
 # Wallpapers
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Copies all wallpapers from the repo to ~/Pictures/wallpapers/.
+# Always redeployed on re-run so the live set stays in sync with the repo.
 setup_wallpapers() {
     local wall_dir="$HOME/Pictures/wallpapers"
 
@@ -589,6 +642,9 @@ setup_wallpapers() {
 # Dotfiles
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Copies all config files from the repo to their destinations under $HOME.
+# Always redeployed on re-run — no existence checks, latest repo state wins.
+# Skips individual files that are not present in the repo without failing.
 deploy_configs() {
     log_info "Deploying config files..."
 
