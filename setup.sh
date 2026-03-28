@@ -467,46 +467,40 @@ configure_lightdm() {
     log_ok "LightDM configured"
 }
 
-# Enables system and user services. Each service is guarded by is-enabled so
-# re-runs don't re-enable already-enabled services.
-# Pipewire is a user service — enabled without sudo via systemctl --user.
+# Enables a systemd service if not already enabled.
+# Usage: enable_service [--user] <service>
+# --user: enables as a user service (no sudo); omit for system services.
+enable_service() {
+    local flag=""
+    if [[ "$1" == "--user" ]]; then
+        flag="--user"
+        shift
+    fi
+    local service=$1
+    if ! systemctl $flag is-enabled "$service" &>/dev/null; then
+        sudo systemctl $flag enable "$service"
+        log_info "Enabled $service"
+    fi
+}
+
+# Enables system and user services.
 # Docker group membership requires logout to take effect.
 enable_services() {
     log_info "Enabling services..."
 
-    # NetworkManager
-    if ! systemctl is-enabled NetworkManager &>/dev/null; then
-        sudo systemctl enable NetworkManager
-        log_info "Enabled NetworkManager"
-    fi
+    enable_service NetworkManager
+    enable_service lightdm
+    enable_service bluetooth
+    enable_service docker
 
-    # LightDM
-    if ! systemctl is-enabled lightdm &>/dev/null; then
-        sudo systemctl enable lightdm
-        log_info "Enabled LightDM"
-    fi
-
-    # Bluetooth
-    if ! systemctl is-enabled bluetooth &>/dev/null; then
-        sudo systemctl enable bluetooth
-        log_info "Enabled bluetooth"
-    fi
-
-    # Docker
-    if ! systemctl is-enabled docker &>/dev/null; then
-        sudo systemctl enable docker
-        log_info "Enabled docker"
-    fi
     if ! groups "$USER" | grep -q docker; then
         sudo usermod -aG docker "$USER"
         log_info "Added $USER to docker group"
     fi
 
-    # Pipewire (user service - enabled by default on Arch, but just in case)
-    if ! systemctl --user is-enabled pipewire &>/dev/null 2>&1; then
-        systemctl --user enable pipewire pipewire-pulse
-        log_info "Enabled pipewire"
-    fi
+    # Pipewire runs as a user service — enabled by default on Arch, but just in case
+    enable_service --user pipewire
+    enable_service --user pipewire-pulse
 
     log_ok "Services enabled"
 }
