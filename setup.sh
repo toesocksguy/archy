@@ -646,24 +646,41 @@ setup_wallpapers() {
 deploy_configs() {
     log_info "Deploying config files..."
 
-    # Config files to copy: source (in repo) -> destination
-    local -A configs=(
-        ["$CONFIG_DIR/emacs/init.el"]="$HOME/.config/emacs/init.el"
-["$CONFIG_DIR/picom/picom.conf"]="$HOME/.config/picom/picom.conf"
-        ["$CONFIG_DIR/rofi/config.rasi"]="$HOME/.config/rofi/config.rasi"
-        ["$CONFIG_DIR/rofi/gruvbox-material.rasi"]="$HOME/.config/rofi/gruvbox-material.rasi"
-        ["$CONFIG_DIR/kitty/kitty.conf"]="$HOME/.config/kitty/kitty.conf"
-        ["$CONFIG_DIR/kitty/current-theme.conf"]="$HOME/.config/kitty/current-theme.conf"
-        ["$CONFIG_DIR/xarchiver/xarchiverrc"]="$HOME/.config/xarchiver/xarchiverrc"
-        ["$CONFIG_DIR/bashrc"]="$HOME/.bashrc"
-        ["$CONFIG_DIR/dunst/dunstrc"]="$HOME/.config/dunst/dunstrc"
-        ["$CONFIG_DIR/gtk-3.0/settings.ini"]="$HOME/.config/gtk-3.0/settings.ini"
-        ["$CONFIG_DIR/gtk-3.0/gtk.css"]="$HOME/.config/gtk-3.0/gtk.css"
-        ["$CONFIG_DIR/gtk-4.0/settings.ini"]="$HOME/.config/gtk-4.0/settings.ini"
+    # Config files to copy: srcs and dests are parallel arrays (index n in srcs
+    # maps to index n in dests). Indexed arrays guarantee iteration order,
+    # unlike associative arrays which iterate in undefined order.
+    local srcs=(
+        "$CONFIG_DIR/emacs/init.el"
+        "$CONFIG_DIR/picom/picom.conf"
+        "$CONFIG_DIR/rofi/config.rasi"
+        "$CONFIG_DIR/rofi/gruvbox-material.rasi"
+        "$CONFIG_DIR/kitty/kitty.conf"
+        "$CONFIG_DIR/kitty/current-theme.conf"
+        "$CONFIG_DIR/xarchiver/xarchiverrc"
+        "$CONFIG_DIR/bashrc"
+        "$CONFIG_DIR/dunst/dunstrc"
+        "$CONFIG_DIR/gtk-3.0/settings.ini"
+        "$CONFIG_DIR/gtk-3.0/gtk.css"
+        "$CONFIG_DIR/gtk-4.0/settings.ini"
+    )
+    local dests=(
+        "$HOME/.config/emacs/init.el"
+        "$HOME/.config/picom/picom.conf"
+        "$HOME/.config/rofi/config.rasi"
+        "$HOME/.config/rofi/gruvbox-material.rasi"
+        "$HOME/.config/kitty/kitty.conf"
+        "$HOME/.config/kitty/current-theme.conf"
+        "$HOME/.config/xarchiver/xarchiverrc"
+        "$HOME/.bashrc"
+        "$HOME/.config/dunst/dunstrc"
+        "$HOME/.config/gtk-3.0/settings.ini"
+        "$HOME/.config/gtk-3.0/gtk.css"
+        "$HOME/.config/gtk-4.0/settings.ini"
     )
 
-    for src in "${!configs[@]}"; do
-        local dest="${configs[$src]}"
+    for i in "${!srcs[@]}"; do
+        local src="${srcs[$i]}"
+        local dest="${dests[$i]}"
 
         if [[ ! -f "$src" ]]; then
             log_info "Skipping $(basename "$src") (not in repo)"
