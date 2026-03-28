@@ -39,6 +39,32 @@ log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_ok()   { echo -e "${GREEN}[OK]${NC} $1"; }
 log_err()  { echo -e "${RED}[ERR]${NC} $1" >&2; }
 
+# Validates preconditions before any work starts. Fails fast with a clear
+# message rather than letting errors surface deep into the run.
+preflight() {
+    if [[ $EUID -eq 0 ]]; then
+        log_err "Do not run as root — run as a regular user with sudo access"
+        exit 1
+    fi
+
+    if ! command -v pacman &>/dev/null; then
+        log_err "pacman not found — this script requires an Arch-based system"
+        exit 1
+    fi
+
+    if ! sudo -v &>/dev/null; then
+        log_err "sudo access required"
+        exit 1
+    fi
+
+    if ! ping -c1 -W3 archlinux.org &>/dev/null; then
+        log_err "No network connectivity — check your connection and try again"
+        exit 1
+    fi
+
+    log_ok "Preflight checks passed"
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Packages
 # ─────────────────────────────────────────────────────────────────────────────
@@ -660,6 +686,7 @@ main() {
     echo "Arch Linux Setup"
     echo "================"
 
+    preflight
     update_system
     install_packages
     install_yay
