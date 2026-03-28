@@ -609,17 +609,6 @@ setup_xresources() {
     log_ok "Xresources configured"
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# XDG User Directories
-# ─────────────────────────────────────────────────────────────────────────────
-
-# Creates standard XDG user directories (~/Documents, ~/Downloads, etc.).
-# Safe to re-run — xdg-user-dirs-update is idempotent.
-setup_xdg_dirs() {
-    log_info "Setting up XDG user directories..."
-    xdg-user-dirs-update
-    log_ok "XDG user directories created"
-}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Wallpapers
@@ -712,7 +701,7 @@ main() {
     install_dwm
     install_slstatus
     setup_dwm_session
-    setup_xdg_dirs
+    xdg-user-dirs-update
     deploy_configs
     install_cursor_theme
     setup_xresources
