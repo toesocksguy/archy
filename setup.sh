@@ -197,8 +197,6 @@ CONFLICTING_PACKAGES=(
     pulseaudio-bluetooth
 )
 
-# Remove conflicting packages before installing new ones
-# This prevents pacman from failing due to package conflicts
 # Removes packages that conflict with our desired stack before installation.
 # Checks each package individually to avoid pacman failing on missing packages.
 # Pulseaudio must be removed before pipewire-pulse — they own the same socket.
@@ -504,7 +502,11 @@ enable_service() {
     fi
     local service=$1
     if ! systemctl $flag is-enabled "$service" &>/dev/null; then
-        sudo systemctl $flag enable "$service"
+        if [[ -n "$flag" ]]; then
+            systemctl $flag enable "$service"
+        else
+            sudo systemctl enable "$service"
+        fi
         log_info "Enabled $service"
     fi
 }
@@ -608,7 +610,6 @@ setup_xresources() {
 
     log_ok "Xresources configured"
 }
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Wallpapers
