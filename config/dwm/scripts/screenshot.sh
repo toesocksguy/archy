@@ -20,5 +20,5 @@ fi
 # Only proceed if maim succeeded (user may have cancelled region select)
 if [[ $? -eq 0 && -f "$outfile" ]]; then
     xclip -selection clipboard -t image/png -i "$outfile"
-    notify-send "Screenshot" "Saved to $(basename "$outfile")"
+    notify-send "Screenshot" "Saved to $outfile"
 fi
