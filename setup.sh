@@ -579,13 +579,13 @@ configure_slick_greeter() {
     log_info "Configuring slick-greeter..."
 
     # Copy background wallpaper to system-accessible path
-    local bg_src="$SCRIPT_DIR/wallpapers/macos-sequoia.jpg"
+    local bg_src="$SCRIPT_DIR/wallpapers/ocean-sunset.jpg"
     if [[ -f "$bg_src" ]]; then
         sudo mkdir -p /usr/share/backgrounds
-        sudo cp "$bg_src" /usr/share/backgrounds/macos-sequoia.jpg
+        sudo cp "$bg_src" /usr/share/backgrounds/ocean-sunset.jpg
         log_info "Copied background to /usr/share/backgrounds/"
     else
-        log_info "macos-sequoia.jpg not found in wallpapers/, skipping background"
+        log_info "ocean-sunset.jpg not found in wallpapers/, skipping background"
     fi
 
     # Deploy slick-greeter config
