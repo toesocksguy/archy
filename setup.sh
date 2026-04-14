@@ -239,6 +239,32 @@ install_packages() {
     log_ok "Packages installed"
 }
 
+# Detects CPU vendor and installs the appropriate microcode package.
+# Microcode updates patch CPU bugs at boot time — critical for stability and
+# security. Must run after pacman is available and the system is updated.
+# Warns and skips (rather than failing) on VMs or unknown hardware where
+# /proc/cpuinfo may not report a known vendor string.
+install_microcode() {
+    log_info "Detecting CPU vendor for microcode..."
+
+    local vendor
+    vendor=$(grep -m1 'vendor_id' /proc/cpuinfo | awk '{print $3}')
+
+    case "$vendor" in
+        GenuineIntel)
+            sudo pacman -S --needed --noconfirm intel-ucode
+            log_ok "intel-ucode installed"
+            ;;
+        AuthenticAMD)
+            sudo pacman -S --needed --noconfirm amd-ucode
+            log_ok "amd-ucode installed"
+            ;;
+        *)
+            log_info "Unknown CPU vendor '$vendor' — skipping microcode install"
+            ;;
+    esac
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # AUR Helper
 # ─────────────────────────────────────────────────────────────────────────────
@@ -698,6 +724,7 @@ main() {
     preflight
     update_system
     install_packages
+    install_microcode
     install_yay
     install_aur_packages
     install_gruvbox_gtk_theme
