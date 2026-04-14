@@ -9,3 +9,7 @@
 .\#*
 *.elc
 auto-save-list/
+
+# Local docs and screenshots
+docs/
+Screenshot*.png

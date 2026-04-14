@@ -190,6 +190,7 @@ PACKAGES=(
     # System
     reflector
     timeshift
+    nftables
 )
 
 # Packages that conflict with our desired packages
@@ -716,6 +717,31 @@ deploy_configs() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Firewall
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Deploys the base nftables config and enables the nftables service.
+# The config is a minimal allowlist: established/related, loopback, ICMP,
+# libvirt bridge, and SSH from RFC1918. Machine-specific rules (app ports,
+# exact subnet) are meant to be added manually after first boot.
+# Safe to re-run — deploy always overwrites, enable_service is idempotent.
+configure_firewall() {
+    log_info "Configuring firewall..."
+
+    local conf="$CONFIG_DIR/nftables/nftables.conf"
+    if [[ ! -f "$conf" ]]; then
+        log_err "nftables.conf not found in $CONFIG_DIR/nftables/ — skipping firewall config"
+        return 1
+    fi
+
+    sudo cp "$conf" /etc/nftables.conf
+    log_info "Deployed nftables.conf"
+
+    enable_service nftables
+    log_ok "Firewall configured"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -740,6 +766,7 @@ main() {
     setup_wallpapers
     configure_lightdm
     configure_slick_greeter
+    configure_firewall
     enable_services
     log_ok "Setup complete!"
 }
