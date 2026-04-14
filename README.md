@@ -272,6 +272,7 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 
 ## TODO
 
+- [ ] Implement firewall (see firewall.md)
 - [ ] Screenshot keybinding in dwm config.h
 - [x] Wallpapers
 - [ ] Add option for alternative display manager (Ly, etc.)

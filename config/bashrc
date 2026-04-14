@@ -5,9 +5,19 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-alias ls='ls --color=auto'
-alias ll='ls -a --color=auto'
+# --- Modern Tooling ----------------------------------------------
+alias cat='bat'
+
+# --- Directory listings via eza ----------------------------------------------
+alias la='eza -la --icons'
+alias lt='eza --tree --level=2 --icons'
+ls() { command eza --icons "$@"; }
+ll() { command eza -l --icons "$@"; }
+
+# --- Interactive Tooling ----------------------------------------------
 alias grep='grep --color=auto'
+alias thumbnails='nsxiv -t'
+
 PS1='[\u@\h \W]\$ '
 
 export PATH="$PATH:$HOME/.local/bin"
@@ -20,3 +30,12 @@ export LESS_TERMCAP_se=$'\e[0m'
 export LESS_TERMCAP_so=$'\e[01;33m'
 export LESS_TERMCAP_ue=$'\e[0m'
 export LESS_TERMCAP_us=$'\e[1;4;31m'
+
+# Zoxide
+eval "$(zoxide init bash)"
+
+# Mise
+eval "$($HOME/.local/bin/mise activate bash)"
+
+# Starship
+eval "$(starship init bash)"

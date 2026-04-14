@@ -96,6 +96,7 @@ PACKAGES=(
     picom
     rofi
     thunar
+    nsxiv
 
     # Display manager
     lightdm
@@ -156,6 +157,7 @@ PACKAGES=(
     eza
     zoxide
     fd
+    starship
 
     # GTK theme build dependencies
     sassc
