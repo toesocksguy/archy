@@ -63,34 +63,52 @@ static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont,
 static const char *termcmd[] = { "kitty", NULL };
 static const char *roficmd[] = { "rofi", "-show", "drun", "-show-icons", NULL }; /* launch Rofi drun */
 static const char *helpcmd[] = { "/bin/sh", "-c", "~/.config/dwm/scripts/keybindings.sh", NULL };
+/* screenshots: maim saves to ~/Pictures/screenshots/ with a timestamp filename */
+static const char *scrotcmd[]       = { "/bin/sh", "-c", "mkdir -p ~/Pictures/screenshots && maim -s ~/Pictures/screenshots/$(date +%Y-%m-%d_%H-%M-%S).png", NULL }; /* Super+s: region select */
+static const char *scrotfullcmd[]   = { "/bin/sh", "-c", "mkdir -p ~/Pictures/screenshots && maim ~/Pictures/screenshots/$(date +%Y-%m-%d_%H-%M-%S).png", NULL };   /* Super+Shift+s: fullscreen */
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
-        { MODKEY|ShiftMask,             XK_p,      spawn,          {.v = dmenucmd } },
-	{ MODKEY,                       XK_p,      spawn,          {.v = roficmd } },
-	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
-	{ MODKEY|ShiftMask,             XK_w,      spawn,          SHCMD ("feh --randomize --bg-fill ~/Pictures/wallpapers/*")},
-	{ MODKEY,                       XK_b,      togglebar,      {0} },
-	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
-	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
-	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
-	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
-	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
-	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
-	{ MODKEY,                       XK_Return, zoom,           {0} },
-	{ MODKEY,                       XK_Tab,    view,           {0} },
-	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
-	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
-	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
-	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,                       XK_space,  setlayout,      {0} },
-	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
-	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
-	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
-	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
-	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
-	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
+
+	/* launchers */
+	{ MODKEY,                       XK_p,      spawn,          {.v = roficmd } },           /* Super+p: rofi app launcher */
+        { MODKEY|ShiftMask,             XK_p,      spawn,          {.v = dmenucmd } },           /* Super+Shift+p: dmenu */
+	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },            /* Super+Shift+Enter: terminal */
+
+	/* utilities */
+	{ MODKEY|ShiftMask,             XK_w,      spawn,          SHCMD("feh --randomize --bg-fill ~/Pictures/wallpapers/*") }, /* Super+Shift+w: random wallpaper */
+	{ MODKEY,                       XK_s,      spawn,          {.v = scrotcmd } },           /* Super+s: screenshot (region select) */
+	{ MODKEY|ShiftMask,             XK_s,      spawn,          {.v = scrotfullcmd } },       /* Super+Shift+s: screenshot (fullscreen) */
+	{ MODKEY|ShiftMask,             XK_h,      spawn,          {.v = helpcmd } },            /* Super+Shift+h: keybindings help */
+
+	/* window management */
+	{ MODKEY,                       XK_b,      togglebar,      {0} },                        /* Super+b: toggle bar */
+	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },                 /* Super+j: focus next window */
+	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },                 /* Super+k: focus prev window */
+	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },                 /* Super+i: increase master count */
+	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },                 /* Super+d: decrease master count */
+	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },               /* Super+h: shrink master */
+	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },               /* Super+l: grow master */
+	{ MODKEY,                       XK_Return, zoom,           {0} },                        /* Super+Enter: promote to master */
+	{ MODKEY,                       XK_Tab,    view,           {0} },                        /* Super+Tab: toggle last tag */
+	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },                        /* Super+Shift+c: close window */
+	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },                        /* Super+Shift+Space: toggle float */
+
+	/* layouts */
+	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },         /* Super+t: tile layout */
+	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },         /* Super+f: float layout */
+	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },         /* Super+m: monocle layout */
+	{ MODKEY,                       XK_space,  setlayout,      {0} },                        /* Super+Space: toggle last layout */
+
+	/* monitors */
+	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },                 /* Super+,: focus prev monitor */
+	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },                 /* Super+.: focus next monitor */
+	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },                 /* Super+Shift+,: move to prev monitor */
+	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },                 /* Super+Shift+.: move to next monitor */
+
+	/* tags */
+	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },                /* Super+0: view all tags */
+	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },                /* Super+Shift+0: assign to all tags */
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
@@ -100,8 +118,9 @@ static const Key keys[] = {
 	TAGKEYS(                        XK_7,                      6)
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
-	{ MODKEY|ShiftMask,             XK_h,      spawn,          {.v = helpcmd } },
-	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
+
+	/* session */
+	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },                        /* Super+Shift+q: quit dwm */
 };
 
 /* button definitions */

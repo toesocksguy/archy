@@ -273,7 +273,7 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 ## TODO
 
 - [x] Implement firewall (see firewall.md)
-- [ ] Screenshot keybinding in dwm config.h
+- [x] Screenshot keybinding in dwm config.h
 - [x] Wallpapers
 - [ ] Add option for alternative display manager (Ly, etc.)
 - [ ] Screen locker — options: `slock` (suckless, fits the stack), `i3lock` (popular, supports background image), `i3lock-color` (AUR, full customization). Bind to `Super+Shift+l` in `config.h`.
