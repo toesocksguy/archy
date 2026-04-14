@@ -5,24 +5,34 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-# --- Modern Tooling ----------------------------------------------
+# --- Aliases: modern CLI replacements ------------------------------------
+# bat: cat replacement with syntax highlighting and line numbers
 alias cat='bat'
 
-# --- Directory listings via eza ----------------------------------------------
+# grep: colorize matches for readability
+alias grep='grep --color=auto'
+
+# --- Directory listings via eza ------------------------------------------
+# eza: ls replacement with icon support, git integration, and tree view
 alias la='eza -la --icons'
 alias lt='eza --tree --level=2 --icons'
 ls() { command eza --icons "$@"; }
 ll() { command eza -l --icons "$@"; }
 
-# --- Interactive Tooling ----------------------------------------------
-alias grep='grep --color=auto'
+# --- Aliases: applications -----------------------------------------------
+# nsxiv -t: open nsxiv in thumbnail mode (gallery view)
 alias thumbnails='nsxiv -t'
 
+# --- Prompt --------------------------------------------------------------
 PS1='[\u@\h \W]\$ '
 
+# --- PATH ----------------------------------------------------------------
+# ~/.local/bin: user-installed binaries (yay AUR helper, pip --user packages, etc.)
 export PATH="$PATH:$HOME/.local/bin"
 
-# Make man pages more readable
+# --- Man page colors -----------------------------------------------------
+# LESS_TERMCAP_* controls man page text rendering via less.
+# mb/md: bold (green), so/us: standout/underline (yellow/red), me/se/ue: reset.
 export LESS_TERMCAP_mb=$'\e[1;32m'
 export LESS_TERMCAP_md=$'\e[1;32m'
 export LESS_TERMCAP_me=$'\e[0m'
@@ -31,11 +41,9 @@ export LESS_TERMCAP_so=$'\e[01;33m'
 export LESS_TERMCAP_ue=$'\e[0m'
 export LESS_TERMCAP_us=$'\e[1;4;31m'
 
-# Zoxide
+# --- Shell integrations --------------------------------------------------
+# zoxide: smarter cd — tracks frecency and lets you jump with `z <dir>`
 eval "$(zoxide init bash)"
 
-# Mise
-eval "$($HOME/.local/bin/mise activate bash)"
-
-# Starship
+# starship: cross-shell prompt with git status, language versions, etc.
 eval "$(starship init bash)"
