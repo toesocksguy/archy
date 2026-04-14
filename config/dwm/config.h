@@ -63,9 +63,9 @@ static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont,
 static const char *termcmd[] = { "kitty", NULL };
 static const char *roficmd[] = { "rofi", "-show", "drun", "-show-icons", NULL }; /* launch Rofi drun */
 static const char *helpcmd[] = { "/bin/sh", "-c", "~/.config/dwm/scripts/keybindings.sh", NULL };
-/* screenshots: maim saves to ~/Pictures/screenshots/ with a timestamp filename */
-static const char *scrotcmd[]       = { "/bin/sh", "-c", "mkdir -p ~/Pictures/screenshots && maim -s ~/Pictures/screenshots/$(date +%Y-%m-%d_%H-%M-%S).png", NULL }; /* Super+s: region select */
-static const char *scrotfullcmd[]   = { "/bin/sh", "-c", "mkdir -p ~/Pictures/screenshots && maim ~/Pictures/screenshots/$(date +%Y-%m-%d_%H-%M-%S).png", NULL };   /* Super+Shift+s: fullscreen */
+/* screenshots: save to ~/Pictures/screenshots/, copy to clipboard, notify */
+static const char *scrotcmd[]       = { "/bin/sh", "-c", "~/.config/dwm/scripts/screenshot.sh", NULL };         /* Super+s: region select */
+static const char *scrotfullcmd[]   = { "/bin/sh", "-c", "~/.config/dwm/scripts/screenshot.sh --full", NULL };  /* Super+Shift+s: fullscreen */
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
