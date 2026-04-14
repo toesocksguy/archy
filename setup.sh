@@ -680,6 +680,7 @@ deploy_configs() {
         "$CONFIG_DIR/gtk-3.0/settings.ini"
         "$CONFIG_DIR/gtk-3.0/gtk.css"
         "$CONFIG_DIR/gtk-4.0/settings.ini"
+        "$CONFIG_DIR/starship/starship.toml"
     )
     local dests=(
         "$HOME/.config/emacs/init.el"
@@ -694,6 +695,7 @@ deploy_configs() {
         "$HOME/.config/gtk-3.0/settings.ini"
         "$HOME/.config/gtk-3.0/gtk.css"
         "$HOME/.config/gtk-4.0/settings.ini"
+        "$HOME/.config/starship.toml"
     )
 
     for i in "${!srcs[@]}"; do
