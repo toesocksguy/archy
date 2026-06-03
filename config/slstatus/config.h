@@ -13,6 +13,6 @@ static const struct arg args[] = {
 	/* function   format          argument */
 	{ cpu_perc,   " CPU %s%% |",  NULL },
 	{ ram_perc,   " MEM %s%% |",  NULL },
-	{ wifi_essid, " %s |",        "wlan0" },
+	{ ipv4,       " %s |",        "wlan0" },
 	{ datetime,   " %s ",         "%H:%M" },
 };

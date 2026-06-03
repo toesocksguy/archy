@@ -418,14 +418,17 @@ install_dwm() {
     log_ok "dwm installed"
 }
 
-# Installs slstatus. Injects the host's wireless interface name before compiling.
+# Installs slstatus. Injects the host's primary network interface before compiling.
 install_slstatus() {
     install_suckless_tool "slstatus" "https://git.suckless.org/slstatus"
 
-    # Inject the host's actual wireless interface name before compiling —
+    # Inject the host's actual network interface name before compiling —
     # baked into the binary since slstatus is compiled C, not a script.
     local iface
-    iface=$(iw dev | awk '/Interface/{print $2; exit}')
+    iface=$(iw dev 2>/dev/null | awk '/Interface/{print $2; exit}')
+    if [[ -z "$iface" ]]; then
+        iface=$(ip -o -4 addr show up scope global 2>/dev/null | awk '$2 !~ /^(lo|docker|br-|virbr)/ {print $2; exit}' | tr -d '\\')
+    fi
     if [[ -n "$iface" ]]; then
         sed -i "s/wlan0/$iface/" "$HOME/.config/slstatus/config.h"
     fi
