@@ -276,6 +276,8 @@ cp ~/.config/picom/picom.conf ~/repos/archy/config/picom/picom.conf
 - [x] Screenshot keybinding in dwm config.h
 - [x] Wallpapers
 - [ ] Add option for alternative display manager (Ly, etc.)
+- [ ] Configure reflector — rank mirrors by speed/country after install so pacman uses fast mirrors
+- [ ] Deploy Docker `daemon.json` — bind published ports to `127.0.0.1` to prevent Docker bypassing nftables (see firewall.md)
 - [ ] Screen locker — options: `slock` (suckless, fits the stack), `i3lock` (popular, supports background image), `i3lock-color` (AUR, full customization). Bind to `Super+Shift+l` in `config.h`.
 - [x] slstatus network display — show the primary interface IPv4 address instead of Wi-Fi SSID, with `ip` fallback when `iw` is unavailable.
 - [x] Add Starship and gruvbox theme https://starship.rs/presets/gruvbox-rainbow
