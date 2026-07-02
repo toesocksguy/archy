@@ -1,12 +1,13 @@
 # Archy
 
-An idempotent setup script for a dwm-based Arch Linux desktop environment.
+An idempotent setup script for a dwm-based Linux desktop environment. Supports Arch, Debian/Ubuntu, and Fedora — the distro family is auto-detected from `/etc/os-release`.
 
 ## What It Does
 
+- Detects the distro family (arch / debian / fedora) and routes all package operations through the native package manager (pacman / apt-get / dnf)
 - Updates the system
-- Installs packages via pacman
-- Installs yay (AUR helper)
+- Installs packages from a per-distro package list
+- Installs yay (AUR helper) — Arch only, skipped with a warning elsewhere
 - Compiles and installs dwm from suckless.org
 - Compiles and installs slstatus from suckless.org
 - Configures LightDM with slick-greeter
@@ -14,7 +15,7 @@ An idempotent setup script for a dwm-based Arch Linux desktop environment.
 - Deploys config files (bashrc, emacs, kitty, picom, rofi, dwm, slstatus, Xresources)
 - Installs phinger-cursors cursor theme
 - Creates wallpaper directory
-- Installs AUR packages (gruvbox-plus-icon-theme)
+- Installs AUR packages (gruvbox-plus-icon-theme) — Arch only
 - Installs Gruvbox GTK theme
 - Sets up XDG user directories
 - Enables system services (NetworkManager, LightDM, pipewire, bluetooth, docker)
@@ -26,7 +27,11 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
+Run as a regular user with sudo access on Arch, Debian, Ubuntu, or Fedora. Unsupported distros fail fast in preflight.
+
 ## Packages Installed
+
+Names below are the Arch packages. Debian/Ubuntu and Fedora equivalents live in the `PACKAGES_DEBIAN` / `PACKAGES_FEDORA` arrays in `setup.sh`; packages with no repo equivalent on a distro (e.g. `mise`, `starship`, `nsxiv` off Arch) are listed in `UNAVAILABLE_*` arrays and skipped with a warning. The install list is also pre-filtered against the live package index, so a name missing on an older release (e.g. `fastfetch` on Ubuntu 24.04) is skipped instead of aborting the run.
 
 ### Core
 - base-devel, git
@@ -67,9 +72,11 @@ chmod +x setup.sh
 ### System
 - reflector, timeshift, ntfs-3g, xdg-user-dirs
 
-### AUR
+### AUR (Arch only)
 - gruvbox-plus-icon-theme — Gruvbox icon theme
 - libation — audiobook manager (Audible library); may pull in .NET runtime deps
+
+On Debian/Ubuntu and Fedora these are skipped with a warning — install manually if wanted.
 
 ## Troubleshooting Notes
 

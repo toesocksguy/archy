@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 #
-# Arch Linux Environment Setup Script
+# Linux Environment Setup Script
 #
-# Sets up a DWM-based desktop environment with Gruvbox Material Dark theming
-# on a fresh Arch Linux install.
+# Sets up a DWM-based desktop environment with Gruvbox Material Dark theming.
+# Supports Arch, Debian/Ubuntu, and Fedora — distro family is auto-detected
+# from /etc/os-release.
 #
 # PRECONDITIONS:
 #   - Run as a regular user with sudo access (not root)
-#   - pacman and base system available
+#   - Supported distro (arch, debian/ubuntu, fedora) with systemd
 #   - Network connection active
 #
 # IDEMPOTENCY:
@@ -16,8 +17,10 @@
 #   - Wallpapers and config files are always redeployed on re-run.
 #
 # ORDERING:
+#   - detect_distro (in preflight) must run before any pkg_* call.
 #   - Packages must be installed before anything that depends on them.
-#   - yay must be installed before AUR packages.
+#   - yay must be installed before AUR packages (both Arch-only; skipped
+#     with a warning elsewhere).
 #   - install_cursor_theme must run before configure_slick_greeter so the
 #     cursor is in /usr/share/icons/ when LightDM reads its config.
 #   - configure_lightdm must run before enable_services so LightDM starts
@@ -39,6 +42,37 @@ log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_ok()   { echo -e "${GREEN}[OK]${NC} $1"; }
 log_err()  { echo -e "${RED}[ERR]${NC} $1" >&2; }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Distro Detection
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Sets DISTRO to the package-manager family: arch | debian | fedora.
+# Ubuntu and derivatives match via ID_LIKE. Everything downstream branches
+# on this variable, so it must be set before any pkg_* call.
+detect_distro() {
+    if [[ ! -r /etc/os-release ]]; then
+        log_err "/etc/os-release not found — cannot detect distro"
+        exit 1
+    fi
+
+    local id id_like
+    id=$(. /etc/os-release && echo "${ID:-}")
+    id_like=$(. /etc/os-release && echo "${ID_LIKE:-}")
+
+    # Surrounding spaces make word matching exact (ID_LIKE can be multi-word).
+    case " $id $id_like " in
+        *" arch "*)                DISTRO=arch ;;
+        *" debian "*|*" ubuntu "*) DISTRO=debian ;;
+        *" fedora "*)              DISTRO=fedora ;;
+        *)
+            log_err "Unsupported distro: ID=$id ID_LIKE=$id_like (supported: arch, debian/ubuntu, fedora)"
+            exit 1
+            ;;
+    esac
+
+    log_ok "Detected distro family: $DISTRO"
+}
+
 # Validates preconditions before any work starts. Fails fast with a clear
 # message rather than letting errors surface deep into the run.
 preflight() {
@@ -47,17 +81,14 @@ preflight() {
         exit 1
     fi
 
-    if ! command -v pacman &>/dev/null; then
-        log_err "pacman not found — this script requires an Arch-based system"
-        exit 1
-    fi
+    detect_distro
 
     if ! sudo -v &>/dev/null; then
         log_err "sudo access required"
         exit 1
     fi
 
-    if ! ping -c1 -W3 archlinux.org &>/dev/null; then
+    if ! ping -c1 -W3 example.com &>/dev/null; then
         log_err "No network connectivity — check your connection and try again"
         exit 1
     fi
@@ -66,10 +97,71 @@ preflight() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Package Manager Abstraction
+# ─────────────────────────────────────────────────────────────────────────────
+# All package operations go through these four wrappers. Nothing below this
+# section calls pacman/apt/dnf directly. apt-get is used over apt because
+# apt's CLI is not script-stable.
+
+# Full system upgrade.
+pkg_update() {
+    case "$DISTRO" in
+        arch)   sudo pacman -Syu --noconfirm ;;
+        debian) sudo apt-get update && sudo apt-get -y full-upgrade ;;
+        fedora) sudo dnf -y upgrade ;;
+    esac
+}
+
+# Installs packages, skipping ones already installed (--needed on pacman;
+# apt-get and dnf skip installed packages natively) — safe to re-run.
+pkg_install() {
+    case "$DISTRO" in
+        arch)   sudo pacman -S --needed --noconfirm "$@" ;;
+        debian) sudo apt-get install -y "$@" ;;
+        fedora) sudo dnf install -y "$@" ;;
+    esac
+}
+
+# Returns 0 if the package is installed.
+pkg_installed() {
+    case "$DISTRO" in
+        arch)   pacman -Qi "$1" &>/dev/null ;;
+        debian) dpkg -s "$1" &>/dev/null ;;
+        fedora) rpm -q "$1" &>/dev/null ;;
+    esac
+}
+
+# Returns 0 if the package exists in the repos. Used to pre-filter the
+# install list — pacman/apt-get/dnf all abort the entire transaction on a
+# single unknown name, which would kill the run under set -e when a package
+# is missing on an older release (e.g. fastfetch on Ubuntu 24.04).
+pkg_available() {
+    case "$DISTRO" in
+        arch)   pacman -Si "$1" &>/dev/null || pacman -Sg "$1" &>/dev/null ;;
+        debian) apt-cache show "$1" &>/dev/null ;;
+        fedora) [[ -n "$(dnf -q repoquery "$1" 2>/dev/null)" ]] ;;
+    esac
+}
+
+# Removes packages including config files and unneeded dependencies.
+pkg_remove() {
+    case "$DISTRO" in
+        arch)   sudo pacman -Rns --noconfirm "$@" ;;
+        debian) sudo apt-get purge -y --autoremove "$@" ;;
+        fedora) sudo dnf remove -y "$@" ;;
+    esac
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Packages
 # ─────────────────────────────────────────────────────────────────────────────
+# One flat list per distro family. install_packages picks the right one via
+# nameref — shellcheck can't see nameref use, hence the SC2034 disables.
+# UNAVAILABLE_* lists packages with no repo equivalent on that distro —
+# logged as skipped, install manually if wanted.
 
-PACKAGES=(
+# shellcheck disable=SC2034
+PACKAGES_ARCH=(
     # Core
     base-devel
     git
@@ -193,72 +285,373 @@ PACKAGES=(
     nftables
 )
 
+# shellcheck disable=SC2034
+UNAVAILABLE_ARCH=()
+
+# Verified against debian:stable (Debian 13) and ubuntu:24.04 apt indexes —
+# every name exists on both except where noted (pkg_available pre-filter
+# skips those gracefully on releases that lack them).
+# shellcheck disable=SC2034
+PACKAGES_DEBIAN=(
+    # Core
+    build-essential
+    git
+
+    # X11
+    xserver-xorg
+    xinit
+    x11-xserver-utils   # xrandr, xsetroot
+
+    # dwm build dependencies (dev headers — dwm/slstatus compile from source)
+    libx11-dev
+    libxft-dev
+    libxinerama-dev
+    libfontconfig-dev
+    libfreetype-dev
+    libxcb1-dev
+    libxcb-res0-dev     # XRes over xcb, needed by the swallow patch
+    libxres-dev
+
+    # Apps
+    emacs
+    kitty
+    picom
+    rofi
+    thunar
+    nsxiv
+
+    # Display manager
+    lightdm
+    slick-greeter
+
+    # Utils
+    fzf
+    ripgrep
+    feh
+    xclip
+    maim
+    slop
+    suckless-tools      # provides dmenu
+
+    # Browsers
+    firefox-esr         # plain "firefox" is a snap shim on Ubuntu
+
+    # Notifications
+    dunst
+
+    # Polkit agent
+    lxsession
+
+    # XDG user directories
+    xdg-user-dirs
+
+    # Thunar support
+    gvfs
+    tumbler
+    thunar-archive-plugin
+    thunar-volman
+    xarchiver
+
+    # Filesystem support
+    ntfs-3g
+
+    # Fonts — no nerd-font packaging; install the nerd variant manually
+    fonts-jetbrains-mono
+    fonts-noto
+    fonts-noto-color-emoji
+
+    # Utilities
+    unzip
+    zip
+    man-db
+    wget
+    debianutils         # which
+    tree
+    htop
+    xdotool
+    fastfetch           # not in Ubuntu 24.04 (24.10+ only) — skipped there
+    mpv
+    bash-completion
+
+    # Shell/CLI tools
+    bat                 # binary is "batcat"
+    eza
+    zoxide
+    fd-find             # binary is "fdfind"
+
+    # GTK theme build dependencies
+    sassc
+    gnome-themes-extra
+
+    # Audio
+    pipewire
+    pipewire-pulse
+    pipewire-alsa
+    wireplumber
+    pavucontrol
+
+    # Network
+    network-manager
+    network-manager-gnome   # nm-applet
+    iw
+
+    # Bluetooth
+    bluez               # bluetoothctl included; no separate utils package
+    blueman
+
+    # Containers
+    docker.io
+    docker-compose
+
+    # Media
+    yt-dlp
+
+    # System
+    timeshift
+    nftables
+)
+
+# Not packaged for Debian/Ubuntu — install manually if wanted.
+# shellcheck disable=SC2034
+UNAVAILABLE_DEBIAN=(
+    mise
+    starship
+    reflector   # Arch mirror ranker — no equivalent needed
+)
+
+# Verified against fedora:latest (dnf repoquery) — every name below exists
+# in the base repos.
+# shellcheck disable=SC2034
+PACKAGES_FEDORA=(
+    # Core (no base-devel group; the pieces suckless builds need)
+    make
+    gcc
+    patch
+    pkgconf
+    git
+
+    # X11
+    xorg-x11-server-Xorg
+    xorg-x11-xinit
+    xrandr
+    xsetroot
+
+    # dwm build dependencies (dev headers — dwm/slstatus compile from source)
+    libX11-devel
+    libXft-devel
+    libXinerama-devel
+    fontconfig-devel
+    freetype-devel
+    libxcb-devel
+    xcb-util-wm-devel
+    libXres-devel
+
+    # Apps
+    emacs
+    kitty
+    picom
+    rofi
+    Thunar              # RPM name is capitalized
+
+    # Display manager
+    lightdm
+    slick-greeter
+
+    # Utils
+    fzf
+    ripgrep
+    feh
+    xclip
+    maim
+    slop
+    dmenu
+
+    # Browsers
+    firefox
+
+    # Notifications
+    dunst
+
+    # Polkit agent
+    lxsession
+
+    # XDG user directories
+    xdg-user-dirs
+
+    # Thunar support
+    gvfs
+    tumbler
+    thunar-archive-plugin
+    thunar-volman
+    xarchiver
+
+    # Filesystem support
+    ntfs-3g
+
+    # Fonts — no nerd-font packaging; install the nerd variant manually
+    jetbrains-mono-fonts
+    google-noto-sans-fonts
+    google-noto-color-emoji-fonts
+
+    # Utilities
+    unzip
+    zip
+    man-db
+    wget2               # Fedora replaced wget; provides the wget command
+    which
+    tree
+    htop
+    xdotool
+    fastfetch
+    mpv
+    bash-completion
+
+    # Shell/CLI tools
+    bat
+    eza
+    zoxide
+    fd-find
+
+    # GTK theme build dependencies (gnome-themes-extra not packaged — the
+    # Gruvbox GTK install script may skip pieces that want it)
+    sassc
+
+    # Audio
+    pipewire
+    pipewire-pulseaudio
+    pipewire-alsa
+    wireplumber
+    pavucontrol
+
+    # Network
+    NetworkManager
+    network-manager-applet
+    iw
+
+    # Bluetooth
+    bluez               # bluetoothctl included; no separate utils package
+    blueman
+
+    # Containers
+    moby-engine         # docker
+    docker-compose
+
+    # Media
+    yt-dlp
+
+    # System
+    timeshift
+    nftables
+)
+
+# Not packaged for Fedora — install manually if wanted.
+# shellcheck disable=SC2034
+UNAVAILABLE_FEDORA=(
+    mise
+    nsxiv
+    starship            # COPR only
+    gnome-themes-extra
+    reflector   # Arch mirror ranker — no equivalent needed
+)
+
 # Packages that conflict with our desired packages
-# (e.g., pulseaudio conflicts with pipewire-pulse)
+# (e.g., pulseaudio conflicts with pipewire-pulse). Superset across distros —
+# pkg_installed filters, so names absent on a given distro are harmless.
 CONFLICTING_PACKAGES=(
     pulseaudio
     pulseaudio-bluetooth
+    pulseaudio-module-bluetooth
 )
 
 # Removes packages that conflict with our desired stack before installation.
-# Checks each package individually to avoid pacman failing on missing packages.
-# Pulseaudio must be removed before pipewire-pulse — they own the same socket.
+# Checks each package individually to avoid the package manager failing on
+# missing packages. Pulseaudio must be removed before pipewire-pulse — they
+# own the same socket.
 remove_conflicting() {
     log_info "Checking for conflicting packages..."
     local to_remove=()
 
     # Check which conflicting packages are installed
     for pkg in "${CONFLICTING_PACKAGES[@]}"; do
-        if pacman -Qi "$pkg" &>/dev/null; then
+        if pkg_installed "$pkg"; then
             to_remove+=("$pkg")
         fi
     done
 
     # Remove them if any were found
-    # -R: remove, -n: remove config files, -s: remove unneeded dependencies
     if [[ ${#to_remove[@]} -gt 0 ]]; then
         log_info "Removing: ${to_remove[*]}"
-        sudo pacman -Rns --noconfirm "${to_remove[@]}"
+        pkg_remove "${to_remove[@]}"
     fi
 }
 
-# Full system upgrade before installing packages to avoid partial upgrade issues.
-# Arch does not support partial upgrades — skipping this risks broken dependencies.
+# Full system upgrade before installing packages to avoid partial upgrade
+# issues. Critical on Arch (no partial upgrade support), harmless elsewhere.
 update_system() {
     log_info "Updating system..."
-    sudo pacman -Syu --noconfirm
+    pkg_update
     log_ok "System updated"
 }
 
-# Installs all packages in PACKAGES. Calls remove_conflicting first to clear
-# anything that would cause a conflict. --needed skips already-installed packages,
-# making this safe to re-run.
+# Installs the package list for the detected distro. Calls remove_conflicting
+# first to clear anything that would cause a conflict. Already-installed
+# packages are skipped, making this safe to re-run. The list is pre-filtered
+# through pkg_available — names missing on this release are warned about and
+# skipped rather than aborting the whole transaction.
 install_packages() {
     log_info "Installing packages..."
     remove_conflicting
-    sudo pacman -S --needed --noconfirm "${PACKAGES[@]}"
+
+    local -n pkgs="PACKAGES_${DISTRO^^}"
+    local -n unavailable="UNAVAILABLE_${DISTRO^^}"
+
+    if [[ ${#unavailable[@]} -gt 0 ]]; then
+        log_info "Not packaged for $DISTRO, skipping: ${unavailable[*]}"
+    fi
+
+    local to_install=() missing=()
+    for pkg in "${pkgs[@]}"; do
+        if pkg_available "$pkg"; then
+            to_install+=("$pkg")
+        else
+            missing+=("$pkg")
+        fi
+    done
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        log_err "Not in repos on this release, skipping: ${missing[*]}"
+    fi
+
+    pkg_install "${to_install[@]}"
     log_ok "Packages installed"
 }
 
 # Detects CPU vendor and installs the appropriate microcode package.
 # Microcode updates patch CPU bugs at boot time — critical for stability and
-# security. Must run after pacman is available and the system is updated.
-# Warns and skips (rather than failing) on VMs or unknown hardware where
-# /proc/cpuinfo may not report a known vendor string.
+# security. Package names differ per distro; on Fedora, AMD microcode ships
+# inside linux-firmware. Warns and skips (rather than failing) on VMs or
+# unknown hardware where /proc/cpuinfo may not report a known vendor string.
 install_microcode() {
     log_info "Detecting CPU vendor for microcode..."
 
     local vendor
     vendor=$(grep -m1 'vendor_id' /proc/cpuinfo | awk '{print $3}')
 
+    local intel_pkg amd_pkg
+    case "$DISTRO" in
+        arch)   intel_pkg=intel-ucode;     amd_pkg=amd-ucode ;;
+        debian) intel_pkg=intel-microcode; amd_pkg=amd64-microcode ;;
+        fedora) intel_pkg=microcode_ucode; amd_pkg=linux-firmware ;;
+    esac
+
     case "$vendor" in
         GenuineIntel)
-            sudo pacman -S --needed --noconfirm intel-ucode
-            log_ok "intel-ucode installed"
+            pkg_install "$intel_pkg"
+            log_ok "$intel_pkg installed"
             ;;
         AuthenticAMD)
-            sudo pacman -S --needed --noconfirm amd-ucode
-            log_ok "amd-ucode installed"
+            pkg_install "$amd_pkg"
+            log_ok "$amd_pkg installed"
             ;;
         *)
             log_info "Unknown CPU vendor '$vendor' — skipping microcode install"
@@ -267,13 +660,19 @@ install_microcode() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# AUR Helper
+# AUR Helper (Arch only)
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Installs yay AUR helper from source. Skips if already installed.
+# AUR only exists on Arch — skipped with a warning elsewhere.
 # Uses a subshell for the cd so a build failure doesn't strand the parent shell.
 # trap ensures the tmp dir is cleaned up even if makepkg fails.
 install_yay() {
+    if [[ "$DISTRO" != "arch" ]]; then
+        log_info "Skipping yay (AUR helper) — Arch only"
+        return
+    fi
+
     if command -v yay &>/dev/null; then
         log_ok "yay already installed"
         return
@@ -289,7 +688,7 @@ install_yay() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# AUR Packages
+# AUR Packages (Arch only)
 # ─────────────────────────────────────────────────────────────────────────────
 
 AUR_PACKAGES=(
@@ -298,8 +697,13 @@ AUR_PACKAGES=(
 )
 
 # Installs AUR packages via yay. Skips already-installed packages with --needed.
-# Requires yay to be installed first.
+# Requires yay to be installed first. Skipped with a warning on non-Arch.
 install_aur_packages() {
+    if [[ "$DISTRO" != "arch" ]]; then
+        log_info "Skipping AUR packages (${AUR_PACKAGES[*]}) — Arch only, install manually if wanted"
+        return
+    fi
+
     log_info "Installing AUR packages..."
     yay -S --needed --noconfirm "${AUR_PACKAGES[@]}"
     log_ok "AUR packages installed"
@@ -543,7 +947,8 @@ enable_service() {
     fi
 }
 
-# Enables system and user services.
+# Enables system and user services. Service names are identical across the
+# supported distros (docker.io and moby-engine both ship docker.service).
 # Docker group membership requires logout to take effect.
 enable_services() {
     log_info "Enabling services..."
@@ -558,7 +963,8 @@ enable_services() {
         log_info "Added $USER to docker group"
     fi
 
-    # Pipewire runs as a user service — enabled by default on Arch, but just in case
+    # Pipewire runs as a user service — enabled by default on most distros,
+    # but just in case
     enable_service --user pipewire
     enable_service --user pipewire-pulse
 
@@ -749,8 +1155,8 @@ configure_firewall() {
 # ─────────────────────────────────────────────────────────────────────────────
 
 main() {
-    echo "Arch Linux Setup"
-    echo "================"
+    echo "Desktop Environment Setup"
+    echo "========================="
 
     preflight
     update_system
