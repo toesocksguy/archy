@@ -8,6 +8,8 @@ Super+p             Rofi launcher
 Super+Shift+p       dmenu
 Super+Shift+Return  Terminal
 Super+Shift+w       Random wallpaper
+Super+s             Screenshot region
+Super+Shift+s       Screenshot fullscreen
 Super+Shift+c       Close window
 Super+Shift+q       Quit dwm
 Super+b             Toggle bar
